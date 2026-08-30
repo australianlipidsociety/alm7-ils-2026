@@ -2478,3 +2478,101 @@ h2 { font-size: 28px; }
     white-space: nowrap;
   }
 }
+
+
+/* FINAL mobile navigation override — exactly five tabs in one row */
+@media (max-width: 700px) {
+  .mobile-nav {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-auto-flow: column !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+    padding-left: max(2px, env(safe-area-inset-left)) !important;
+    padding-right: max(2px, env(safe-area-inset-right)) !important;
+  }
+
+  .mobile-nav button {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    padding: 7px 1px max(7px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+  }
+
+  .mobile-nav button span {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-nav button small {
+    display: block !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    overflow: visible !important;
+    font-size: clamp(7px, 2.15vw, 9px) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.18px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* Independent facilitator modal behaviour */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+}
+
+#facilitator-modal[hidden] {
+  display: none !important;
+}
+
+#facilitator-modal.facilitator-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483000 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 18px !important;
+}
+
+#facilitator-modal.facilitator-modal.open {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#facilitator-modal .facilitator-modal-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: auto !important;
+}
+
+#facilitator-modal .facilitator-modal-card {
+  position: relative !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+.facilitator-card {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.facilitator-card * {
+  pointer-events: none !important;
+}
