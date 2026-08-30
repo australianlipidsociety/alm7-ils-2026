@@ -2249,3 +2249,232 @@ h2 { font-size: 28px; }
   .sponsor-card.platinum { grid-column:auto; grid-template-columns:1fr; }
   .sponsor-card.platinum .sponsor-logo-wrap { min-height:130px; }
 }
+
+
+/* =========================================================
+   Desktop/mobile consistency pass
+   Keep the content layout deliberately close to the mobile
+   presentation instead of spreading cards across wide screens.
+   ========================================================= */
+
+@media (min-width: 901px) {
+  /* Explore Perth: use the same stacked visual rhythm as mobile */
+  .perth-page {
+    width: min(920px, calc(100% - 48px));
+  }
+
+  .perth-hero {
+    grid-template-columns: 1fr !important;
+  }
+
+  .perth-hero-copy {
+    padding: 32px !important;
+  }
+
+  .perth-hero-art {
+    min-height: 230px !important;
+  }
+
+  .perth-section-block .section-heading {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .perth-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .perth-card,
+  .perth-card.feature-card {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-rows: auto;
+    min-height: 175px !important;
+    padding: 0 20px 0 0 !important;
+    align-items: stretch;
+  }
+
+  .perth-card-photo {
+    grid-row: 1 / span 6;
+    width: 230px;
+    height: 100% !important;
+    min-height: 175px;
+    margin: 0 20px 0 0 !important;
+  }
+
+  .perth-card .perth-card-icon {
+    margin: 18px 0 4px !important;
+    font-size: 25px;
+  }
+
+  .perth-card h3 {
+    margin: 0 0 5px !important;
+  }
+
+  .perth-card p {
+    padding-right: 8px;
+  }
+
+  .perth-card > span {
+    margin: 9px 0 16px !important;
+  }
+
+  .perth-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Sponsors: stacked cards like the mobile version */
+  .sponsors-page {
+    width: min(920px, calc(100% - 48px));
+  }
+
+  .sponsor-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sponsor-card,
+  .sponsor-card.platinum {
+    grid-column: auto !important;
+    display: grid !important;
+    grid-template-columns: 170px minmax(0, 1fr) !important;
+    gap: 18px !important;
+    padding: 18px !important;
+  }
+
+  .sponsor-logo-wrap,
+  .sponsor-card.platinum .sponsor-logo-wrap {
+    min-height: 130px !important;
+  }
+
+  .sponsor-card.platinum .sponsor-logo-wrap img {
+    max-height: 105px !important;
+  }
+
+  .sponsor-card.platinum .sponsor-copy h3 {
+    margin-top: 0 !important;
+    font-size: 22px !important;
+  }
+
+  /* Workshop already looked right on mobile — keep that structure */
+  .workshop-page {
+    width: min(920px, calc(100% - 48px)) !important;
+  }
+
+  .facilitator-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .facilitator-card {
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+  }
+
+  .workshop-content-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Facilitator interaction safety */
+.facilitator-card {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+}
+
+.facilitator-card img,
+.facilitator-card div,
+.facilitator-card h3,
+.facilitator-card p,
+.facilitator-card span {
+  pointer-events: none;
+}
+
+.facilitator-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+}
+
+.facilitator-modal.open,
+.facilitator-modal[aria-hidden="false"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.facilitator-modal[aria-hidden="true"] {
+  display: none !important;
+}
+
+.facilitator-modal-backdrop {
+  z-index: 0;
+}
+
+.facilitator-modal-card {
+  z-index: 2 !important;
+}
+
+@media (max-width: 620px) {
+  .perth-card {
+    display: block !important;
+    padding: 0 18px 18px !important;
+  }
+
+  .perth-card-photo {
+    width: auto !important;
+    height: 170px !important;
+    min-height: 0 !important;
+    margin: 0 -18px 16px !important;
+  }
+
+  .sponsor-card,
+  .sponsor-card.platinum {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+}
+
+
+/* Mobile bottom navigation: keep every tab on one horizontal row */
+@media (max-width: 620px) {
+  .mobile-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-nav button {
+    flex: 0 0 68px !important;
+    width: 68px;
+    min-width: 68px;
+    max-width: 68px;
+    padding: 8px 3px 7px !important;
+    white-space: nowrap;
+  }
+
+  .mobile-nav button span {
+    display: block;
+    line-height: 1;
+  }
+
+  .mobile-nav button small {
+    display: block;
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 9px !important;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

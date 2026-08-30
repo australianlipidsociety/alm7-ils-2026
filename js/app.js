@@ -1038,47 +1038,90 @@ const WORKSHOP_FACILITATORS = {
 
 function openFacilitator(id) {
   const person = WORKSHOP_FACILITATORS[id];
-  const modal = document.querySelector("#facilitator-modal");
+  const modal = document.getElementById("facilitator-modal");
   if (!person || !modal) return;
 
-  const photo = document.querySelector("#facilitator-modal-photo");
-  const name = document.querySelector("#facilitator-modal-name");
-  const role = document.querySelector("#facilitator-modal-role");
-  const bio = document.querySelector("#facilitator-modal-bio");
+  const photo = document.getElementById("facilitator-modal-photo");
+  const name = document.getElementById("facilitator-modal-name");
+  const role = document.getElementById("facilitator-modal-role");
+  const bio = document.getElementById("facilitator-modal-bio");
 
-  photo.src = person.photo;
-  photo.alt = person.name;
-  name.textContent = person.name;
-  role.textContent = person.role;
-  bio.textContent = person.bio;
+  if (photo) {
+    photo.src = person.photo;
+    photo.alt = person.name;
+  }
+  if (name) name.textContent = person.name;
+  if (role) role.textContent = person.role;
+  if (bio) bio.textContent = person.bio;
 
+  modal.hidden = false;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 }
 
 function closeFacilitator() {
-  const modal = document.querySelector("#facilitator-modal");
+  const modal = document.getElementById("facilitator-modal");
   if (!modal) return;
+
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
+  modal.hidden = true;
   document.body.style.overflow = "";
 }
 
-document.addEventListener("click", event => {
-  const card = event.target.closest("[data-facilitator]");
-  if (card) {
-    event.preventDefault();
-    openFacilitator(card.dataset.facilitator);
-    return;
+function initialiseFacilitatorCards() {
+  const modal = document.getElementById("facilitator-modal");
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
   }
 
-  if (event.target.closest("#facilitator-modal .modal-close") ||
-      event.target.closest("#facilitator-modal .facilitator-modal-backdrop")) {
+  document.querySelectorAll("[data-facilitator]").forEach(card => {
+    if (card.dataset.bioBound === "true") return;
+    card.dataset.bioBound = "true";
+
+    card.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      openFacilitator(card.dataset.facilitator);
+    });
+
+    card.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openFacilitator(card.dataset.facilitator);
+      }
+    });
+  });
+
+  document.querySelector("#facilitator-modal .modal-close")?.addEventListener("click", event => {
+    event.preventDefault();
     closeFacilitator();
+  });
+
+  document.querySelector("#facilitator-modal .facilitator-modal-backdrop")?.addEventListener("click", closeFacilitator);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initialiseFacilitatorCards);
+} else {
+  initialiseFacilitatorCards();
+}
+
+/* Fallback for browsers/pages where cards are later re-rendered */
+document.addEventListener("click", event => {
+  const card = event.target.closest?.("[data-facilitator]");
+  if (card && card.dataset.bioBound !== "true") {
+    event.preventDefault();
+    openFacilitator(card.dataset.facilitator);
   }
 });
 
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") closeFacilitator();
 });
+
+/* Keep functions available to the modal's existing inline close handlers. */
+window.openFacilitator = openFacilitator;
+window.closeFacilitator = closeFacilitator;
