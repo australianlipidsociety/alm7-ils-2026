@@ -122,13 +122,19 @@ function showLoadingIndicator() {
     el.className = "data-status loading";
     el.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span class="sr-only">Loading conference program</span>';
     el.hidden = false;
+    el.style.display = "grid";
   }, 350);
 }
 
 function hideDataStatus() {
   clearTimeout(loadingIndicatorTimer);
+  loadingIndicatorTimer = null;
   const el = document.querySelector("#data-status");
-  if (el) el.hidden = true;
+  if (!el) return;
+  el.hidden = true;
+  el.style.display = "none";
+  el.className = "data-status";
+  el.innerHTML = "";
 }
 
 function showDataError(message = "We’re having trouble loading the program. Please refresh and try again.") {
@@ -138,6 +144,7 @@ function showDataError(message = "We’re having trouble loading the program. Pl
   el.className = "data-status error";
   el.textContent = message;
   el.hidden = false;
+  el.style.display = "block";
 }
 
 // Google Visualization JSONP loader. This avoids CORS problems when testing the app locally.
@@ -562,7 +569,18 @@ function showPage(page) {
 
 function goHome() { showPage("home"); }
 
+function showVenueTab(tab) {
+  document.querySelectorAll(".venue-tab").forEach(btn => {
+    const active = btn.dataset.venueTab === tab;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  document.querySelectorAll(".venue-panel").forEach(panel => panel.classList.remove("active"));
+  document.querySelector(`#venue-panel-${tab}`)?.classList.add("active");
+}
+
 document.querySelectorAll("[data-page]").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
+document.querySelectorAll("[data-venue-tab]").forEach(btn => btn.addEventListener("click", () => showVenueTab(btn.dataset.venueTab)));
 document.querySelector("#program-search")?.addEventListener("input", renderProgram);
 document.querySelector("#clear-program-filters")?.addEventListener("click", () => {
   selectedProgramFilter = "All";

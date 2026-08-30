@@ -19,7 +19,7 @@
         <button class="nav-link active" data-page="home">Program</button>
         <button class="nav-link" data-page="abstracts">Abstracts</button>
         <button class="nav-link" data-page="speakers">Speakers</button>
-        <button class="nav-link" data-page="map">Map</button>
+        <button class="nav-link" data-page="map">Venue</button>
         <button class="nav-link" data-page="my-program">★ My Program</button>
       </nav>
     </div>
@@ -169,11 +169,86 @@
     </section>
 
     <section id="page-map" class="page">
-      <div class="inner-page">
-        <span class="eyebrow">Getting around</span>
-        <h1>Venue Map</h1>
-        <p class="page-intro">We'll add the venue map here, with room information and clickable locations.</p>
-        <div class="placeholder-panel map-placeholder">⌖<br><span>Interactive venue map coming next.</span></div>
+      <div class="venue-page">
+        <div class="venue-heading">
+          <span class="eyebrow">Getting around</span>
+          <h1>Venue</h1>
+          <p class="page-intro">Find your way around and plan your visit.</p>
+        </div>
+
+        <div class="venue-tabs" role="tablist" aria-label="Conference venues">
+          <button class="venue-tab active" data-venue-tab="main" role="tab" aria-selected="true">
+            <span class="venue-tab-icon">▦</span>
+            <span><strong>Main Conference Venue</strong><small>Novotel Perth Langley</small></span>
+          </button>
+          <button class="venue-tab" data-venue-tab="workshop" role="tab" aria-selected="false">
+            <span class="venue-tab-icon">▥</span>
+            <span><strong>Workshop Venue</strong><small>Australian National Phenome Centre</small></span>
+          </button>
+          <button class="venue-tab dinner" data-venue-tab="dinner" role="tab" aria-selected="false">
+            <span class="venue-tab-icon">♨</span>
+            <span><strong>Conference Dinner</strong><small>Venue to be announced</small></span>
+          </button>
+        </div>
+
+        <div id="venue-panel-main" class="venue-panel active">
+          <div class="venue-main-grid">
+            <aside class="venue-info-card">
+              <h2>Novotel Perth Langley</h2>
+              <p class="venue-address">⌖ 221 Adelaide Terrace, Perth WA 6000</p>
+              <a class="venue-map-button" href="https://www.google.com/maps/search/?api=1&query=Novotel+Perth+Langley" target="_blank" rel="noopener">Open in Google Maps ↗</a>
+
+              <div class="venue-info-rule"></div>
+              <div class="venue-feature"><span>🚆</span><div><strong>Perth CBD</strong><small>Easy access by public transport</small></div></div>
+              <div class="venue-feature"><span>🚗</span><div><strong>Parking nearby</strong><small>Check Google Maps for nearby parking options</small></div></div>
+
+              <div class="level-card">
+                <span class="level-card-icon">▦</span>
+                <div><strong>Level 2 — Mezzanine</strong><small>Conference sessions, catering and posters are on Level 2.</small></div>
+              </div>
+            </aside>
+
+            <div class="venue-floor-card">
+              <div class="venue-floor-heading">
+                <div><span class="eyebrow">Novotel Perth Langley</span><h2>Level 2 (Mezzanine)</h2></div>
+                <span class="north-marker" aria-label="North">N ▲</span>
+              </div>
+              <div class="venue-map-wrap">
+                <img src="assets/novotel-level2-map.png" alt="Level 2 map showing Riverside Ballroom, Silver Room, lifts and registration in front of the service lift near the Riverside Ballroom entrance">
+              </div>
+              <div class="room-purpose-grid">
+                <div class="room-purpose room-blue"><span>●</span><div><strong>Riverside Ballroom</strong><small>All sessions &amp; talks</small></div></div>
+                <div class="room-purpose room-purple"><span>●</span><div><strong>Silver Room</strong><small>Catering &amp; poster sessions</small></div></div>
+                <div class="room-purpose room-teal"><span>●</span><div><strong>Registration</strong><small>In front of the service lift, near the Riverside Ballroom entrance</small></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="venue-panel-workshop" class="venue-panel">
+          <div class="venue-simple-card">
+            <span class="venue-big-icon">▥</span>
+            <div>
+              <span class="eyebrow">Workshop venue</span>
+              <h2>Australian National Phenome Centre</h2>
+              <p>The pre-conference workshop will be held at the Australian National Phenome Centre at Murdoch University.</p>
+              <a class="venue-map-button" href="https://www.google.com/maps/search/?api=1&query=Australian+National+Phenome+Centre+Murdoch+University" target="_blank" rel="noopener">Get directions in Google Maps ↗</a>
+            </div>
+          </div>
+          <div class="venue-tip-card"><strong>Tip</strong><span>Use the Google Maps button on your phone for live directions from your current location.</span></div>
+        </div>
+
+        <div id="venue-panel-dinner" class="venue-panel">
+          <div class="venue-simple-card dinner-card">
+            <span class="venue-big-icon">♨</span>
+            <div>
+              <span class="eyebrow">Conference dinner</span>
+              <h2>Venue to be announced</h2>
+              <p>We’ll add the dinner location, directions and any transport information here once the venue is confirmed.</p>
+              <span class="venue-tbc-pill">Details coming soon</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
