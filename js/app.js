@@ -941,11 +941,54 @@ function renderAll() {
   renderSponsors();
 }
 
+
+function openMobileMenu() {
+  const button = document.getElementById("mobile-menu-button");
+  const menu = document.getElementById("mobile-menu");
+  if (!button || !menu) return;
+  menu.hidden = false;
+  button.setAttribute("aria-expanded", "true");
+}
+
+function closeMobileMenu() {
+  const button = document.getElementById("mobile-menu-button");
+  const menu = document.getElementById("mobile-menu");
+  if (!button || !menu) return;
+  menu.hidden = true;
+  button.setAttribute("aria-expanded", "false");
+}
+
+function toggleMobileMenu() {
+  const menu = document.getElementById("mobile-menu");
+  if (!menu) return;
+  if (menu.hidden) openMobileMenu();
+  else closeMobileMenu();
+}
+
+document.getElementById("mobile-menu-button")?.addEventListener("click", event => {
+  event.stopPropagation();
+  toggleMobileMenu();
+});
+
+document.addEventListener("click", event => {
+  const menu = document.getElementById("mobile-menu");
+  const button = document.getElementById("mobile-menu-button");
+  if (!menu || menu.hidden) return;
+  if (!menu.contains(event.target) && !button?.contains(event.target)) closeMobileMenu();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeMobileMenu();
+});
+
 function showPage(page) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   const target = document.querySelector(`#page-${page}`) || document.querySelector("#page-home");
   target.classList.add("active");
-  document.querySelectorAll(".nav-link, .mobile-nav button").forEach(btn => btn.classList.toggle("active", btn.dataset.page === page));
+  document.querySelectorAll(".nav-link, .mobile-menu [data-page]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.page === page);
+  });
+  closeMobileMenu();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
