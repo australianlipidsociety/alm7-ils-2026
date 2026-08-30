@@ -20,6 +20,8 @@
         <button class="nav-link" data-page="abstracts">Abstracts</button>
         <button class="nav-link" data-page="speakers">Speakers</button>
         <button class="nav-link" data-page="map">Venue</button>
+        <button class="nav-link" data-page="perth">Explore Perth</button>
+        <button class="nav-link" data-page="sponsors">Sponsors</button>
         <button class="nav-link" data-page="workshop">Workshop</button>
         <button class="nav-link" data-page="my-program">★ My Program</button>
       </nav>
@@ -152,20 +154,56 @@
     </section>
 
     <section id="page-abstracts" class="page">
-      <div class="inner-page">
+      <div class="inner-page live-directory-page">
         <span class="eyebrow">Scientific program</span>
         <h1>Abstracts</h1>
-        <p class="page-intro">Searchable abstracts and presentations will live here.</p>
-        <div class="placeholder-panel">Abstract browser coming next.</div>
+        <p class="page-intro">Browse the live conference abstract collection. Search by title, author, topic or keyword.</p>
+
+        <div class="directory-toolbar">
+          <label class="directory-search">
+            <span>⌕</span>
+            <input id="abstract-search" type="search" placeholder="Search abstracts..." autocomplete="off">
+          </label>
+          <label class="directory-select-wrap">
+            <span>Topic</span>
+            <select id="abstract-topic-filter" aria-label="Filter abstracts by topic">
+              <option value="All">All topics</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="directory-summary">
+          <strong id="abstract-count">0 abstracts</strong>
+          <span>Updates automatically from the conference Google Sheet.</span>
+        </div>
+
+        <div id="abstract-list" class="abstract-list">
+          <div class="directory-loading">Loading abstracts…</div>
+        </div>
       </div>
     </section>
 
     <section id="page-speakers" class="page">
-      <div class="inner-page">
+      <div class="inner-page live-directory-page">
         <span class="eyebrow">Meet the experts</span>
         <h1>Speakers</h1>
-        <p class="page-intro">Speaker profiles and their conference presentations will live here.</p>
-        <div class="placeholder-panel">Speaker directory coming later.</div>
+        <p class="page-intro">Explore speaker profiles and see where they appear in the conference program.</p>
+
+        <div class="directory-toolbar speakers-toolbar">
+          <label class="directory-search">
+            <span>⌕</span>
+            <input id="speaker-search" type="search" placeholder="Search speakers or affiliations..." autocomplete="off">
+          </label>
+        </div>
+
+        <div class="directory-summary">
+          <strong id="speaker-count">0 speakers</strong>
+          <span>Speaker information is pulled directly from the live conference data.</span>
+        </div>
+
+        <div id="speaker-grid" class="speaker-grid">
+          <div class="directory-loading">Loading speakers…</div>
+        </div>
       </div>
     </section>
 
@@ -280,6 +318,166 @@
       </div>
     </section>
 
+    <section id="page-perth" class="page">
+      <div class="perth-page">
+        <section class="perth-hero">
+          <div class="perth-hero-copy">
+            <span class="eyebrow">Make the most of your stay</span>
+            <h1>Explore Perth &amp; Surrounds</h1>
+            <p>From city sights and beaches to Rottnest Island, Fremantle and the Swan Valley, there is plenty to explore before or after the conference.</p>
+            <div class="perth-hero-actions">
+              <a class="primary-link-button" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">WA Visitor Centre guide ↗</a>
+              <a class="secondary-link-button" href="https://www.wavisitorcentre.com.au/things-to-do/things-to-do-in-perth" target="_blank" rel="noopener">Tours &amp; experiences ↗</a>
+            </div>
+          </div>
+          <div class="perth-hero-art" aria-hidden="true">
+            <div class="perth-sun"></div>
+            <div class="perth-water"></div>
+            <div class="perth-skyline">PERTH</div>
+          </div>
+        </section>
+
+        <section class="perth-section-block">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">In and around the city</span>
+              <h2>City Highlights</h2>
+            </div>
+            <p>Easy options to fit around the conference program.</p>
+          </div>
+
+          <div class="perth-card-grid">
+            <a class="perth-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Perth_skyline_from_Kings_Park.jpg?width=900" alt="Perth skyline from Kings Park" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Perth_skyline_from_Kings_Park.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🌿</div>
+              <h3>Kings Park</h3>
+              <p>Panoramic city and Swan River views from one of Perth's best-known green spaces.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Elizabeth_Quay_Bridge.jpg?width=900" alt="Elizabeth Quay Bridge at sunset" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Elizabeth_Quay_Bridge.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🌊</div>
+              <h3>Elizabeth Quay</h3>
+              <p>Waterfront walks, dining and views beside the Swan River in the heart of the CBD.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Boola_Bardip,_Western_Australian_Museum,_Perth,_2023,_04.jpg?width=900" alt="WA Museum Boola Bardip" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Boola_Bardip,_Western_Australian_Museum,_Perth,_2023,_04.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🏛️</div>
+              <h3>Cultural Precinct</h3>
+              <p>Visit WA Museum Boola Bardip, the Art Gallery of WA and PICA in nearby Northbridge.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Perth_Mint.jpg?width=900" alt="The Perth Mint" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Perth_Mint.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">✨</div>
+              <h3>Perth Mint</h3>
+              <p>Discover Western Australia's gold history and some of the State's most famous treasures.</p>
+              <span>Explore →</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="perth-section-block">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Coast, islands &amp; day trips</span>
+              <h2>Go a little further</h2>
+            </div>
+            <p>Ideal for a free day or an extended stay.</p>
+          </div>
+
+          <div class="perth-card-grid">
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/RottnestQuokka.jpg?width=900" alt="Quokka on Rottnest Island" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:RottnestQuokka.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🐾</div>
+              <h3>Rottnest Island</h3>
+              <p>Beaches, cycling, snorkelling and the chance to meet a quokka, with ferries from Perth and Fremantle.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Fremantle_Markets_-_Fremantle,_Western_Australia.jpg?width=900" alt="Fremantle Markets" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Fremantle_Markets_-_Fremantle,_Western_Australia.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">⚓</div>
+              <h3>Fremantle</h3>
+              <p>Heritage streets, markets, bars, museums and a relaxed port-city atmosphere.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/OIC_swan_valley_vineyards.jpg?width=900" alt="Swan Valley vineyards" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:OIC_swan_valley_vineyards.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🍇</div>
+              <h3>Swan Valley</h3>
+              <p>Cellar doors, local produce, breweries, distilleries and artisan experiences close to Perth.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/52_Cottesloe_Beach_sunset_in_Western_Australia.jpg?width=900" alt="Cottesloe Beach at sunset" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/Category:Cottesloe_Beach" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🏖️</div>
+              <h3>Perth Beaches</h3>
+              <p>Head to Cottesloe, Mettams Pool, Trigg or City Beach for an Indian Ocean sunset.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Hillary%27s_Boat_Harbour,_Perth_Western_Australia.jpg?width=900" alt="Hillarys Boat Harbour" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Hillary%27s_Boat_Harbour,_Perth_Western_Australia.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🐠</div>
+              <h3>Hillarys Boat Harbour</h3>
+              <p>Waterfront dining, shops and AQWA, the Aquarium of Western Australia.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Lesmurdie_Falls.jpg?width=900" alt="Lesmurdie Falls in the Perth Hills" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Lesmurdie_Falls.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🌄</div>
+              <h3>Perth Hills</h3>
+              <p>Walking trails, scenery, wineries and a change of pace just beyond the metropolitan area.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Rockingham_beach.jpg?width=900" alt="Rockingham Beach" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Rockingham_beach.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🐬</div>
+              <h3>Rockingham</h3>
+              <p>Coastal experiences, wildlife cruises and marine adventures south of Perth.</p>
+              <span>Explore →</span>
+            </a>
+            <a class="perth-card feature-card" href="https://www.wavisitorcentre.com.au/explore/perth-surrounds" target="_blank" rel="noopener">
+              <div class="perth-card-photo"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Mandurah_Foreshore_1.jpg?width=900" alt="Mandurah Foreshore" loading="lazy"><a class="perth-photo-credit" href="https://commons.wikimedia.org/wiki/File:Mandurah_Foreshore_1.jpg" target="_blank" rel="noopener" onclick="event.stopPropagation()">Photo: Wikimedia Commons ↗</a></div><div class="perth-card-icon">🛶</div>
+              <h3>Mandurah</h3>
+              <p>Waterways, coastal dining and an easy day trip south of the city.</p>
+              <span>Explore →</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="perth-info-grid">
+          <article class="visa-card">
+            <div class="visa-card-icon">🛂</div>
+            <div>
+              <span class="eyebrow">International delegates</span>
+              <h2>Visa Information</h2>
+              <p>International visitors may need an Australian visa or travel authority. Requirements depend on your passport and circumstances, so please check the delegate information well before travelling.</p>
+              <a class="visa-button" href="https://www.businesseventsperth.com/delegate-destination-microsite/" target="_blank" rel="noopener">Delegate visa &amp; destination information ↗</a>
+            </div>
+          </article>
+
+          <article class="visitor-centre-card">
+            <span class="eyebrow">Need local help?</span>
+            <h2>WA Visitor Centre</h2>
+            <p>The Western Australian Visitor Centre can help with itinerary ideas, tours, bookings and planning your time in WA.</p>
+            <a href="https://www.wavisitorcentre.com.au/" target="_blank" rel="noopener">Visit the WA Visitor Centre ↗</a>
+          </article>
+        </section>
+      </div>
+    </section>
+
+    <section id="page-sponsors" class="page">
+      <div class="sponsors-page">
+        <div class="sponsors-hero">
+          <span class="eyebrow">Thank you to our supporters</span>
+          <h1>Conference Sponsors</h1>
+          <p class="page-intro">Meet the organisations supporting ALM7 &amp; the 5th iLS Conference. Select a sponsor to visit their website or explore their scientific contribution to the program.</p>
+        </div>
+
+        <div id="sponsors-content" class="sponsors-content">
+          <div class="directory-loading">Loading sponsors…</div>
+        </div>
+      </div>
+
+      <div id="sponsor-abstract-modal" class="directory-modal" aria-hidden="true">
+        <div class="directory-modal-backdrop" data-close-sponsor-modal></div>
+        <article class="directory-modal-card sponsor-abstract-modal-card" role="dialog" aria-modal="true" aria-labelledby="sponsor-abstract-title">
+          <button class="directory-modal-close" type="button" data-close-sponsor-modal aria-label="Close sponsor abstract">×</button>
+          <div id="sponsor-abstract-content"></div>
+        </article>
+      </div>
+    </section>
+
     <section id="page-workshop" class="page">
       <div class="workshop-page">
         <div class="workshop-hero">
@@ -305,7 +503,7 @@
           </div>
 
           <div class="facilitator-grid">
-            <button class="facilitator-card" onclick="openFacilitator('philipp')">
+            <button class="facilitator-card" data-facilitator="philipp">
               <img src="assets/philipp-nitschke.jpg" alt="Dr Philipp Nitschke">
               <div>
                 <h3>Dr Philipp Nitschke</h3>
@@ -314,7 +512,7 @@
               </div>
             </button>
 
-            <button class="facilitator-card" onclick="openFacilitator('reika')">
+            <button class="facilitator-card" data-facilitator="reika">
               <img src="assets/reika-masuda.jpg" alt="Dr Reika Masuda">
               <div>
                 <h3>Dr Reika Masuda</h3>
@@ -323,7 +521,7 @@
               </div>
             </button>
 
-            <button class="facilitator-card" onclick="openFacilitator('luke')">
+            <button class="facilitator-card" data-facilitator="luke">
               <img src="assets/luke-whiley.png" alt="Dr Luke Whiley">
               <div>
                 <h3>Dr Luke Whiley</h3>
@@ -420,8 +618,20 @@
           </aside>
         </div>
       </div>
+    </section>
 
-      <div id="facilitator-modal" class="facilitator-modal" aria-hidden="true">
+    <section id="page-my-program" class="page">
+      <div class="inner-page">
+        <span class="eyebrow">Your conference</span>
+        <h1>★ My Program</h1>
+        <p class="page-intro">Your saved sessions will appear here. Favourites are stored on the device, so no account is required.</p>
+        <div id="my-program-list" class="placeholder-panel">You haven't saved any sessions yet.</div>
+      </div>
+    </section>
+  </main>
+
+
+  <div id="facilitator-modal" class="facilitator-modal" aria-hidden="true">
         <div class="facilitator-modal-backdrop" onclick="closeFacilitator()"></div>
         <article class="facilitator-modal-card" role="dialog" aria-modal="true" aria-labelledby="facilitator-modal-name">
           <button class="modal-close" onclick="closeFacilitator()" aria-label="Close facilitator bio">×</button>
@@ -434,18 +644,22 @@
           </div>
         </article>
       </div>
-    </section>
 
-<section id="page-my-program" class="page">
-      <div class="inner-page">
-        <span class="eyebrow">Your conference</span>
-        <h1>★ My Program</h1>
-        <p class="page-intro">Your saved sessions will appear here. Favourites are stored on the device, so no account is required.</p>
-        <div id="my-program-list" class="placeholder-panel">You haven't saved any sessions yet.</div>
-      </div>
-    </section>
-  </main>
+  <div id="abstract-modal" class="directory-modal" aria-hidden="true">
+    <div class="directory-modal-backdrop" data-close-directory-modal="abstract"></div>
+    <article class="directory-modal-card abstract-modal-card" role="dialog" aria-modal="true" aria-labelledby="abstract-modal-title">
+      <button class="directory-modal-close" type="button" data-close-directory-modal="abstract" aria-label="Close abstract">×</button>
+      <div id="abstract-modal-content"></div>
+    </article>
+  </div>
 
+  <div id="speaker-modal" class="directory-modal" aria-hidden="true">
+    <div class="directory-modal-backdrop" data-close-directory-modal="speaker"></div>
+    <article class="directory-modal-card speaker-modal-card" role="dialog" aria-modal="true" aria-labelledby="speaker-modal-name">
+      <button class="directory-modal-close" type="button" data-close-directory-modal="speaker" aria-label="Close speaker profile">×</button>
+      <div id="speaker-modal-content"></div>
+    </article>
+  </div>
 
   <div id="session-modal" class="modal" aria-hidden="true">
     <div class="modal-backdrop" onclick="closeSessionModal()"></div>
@@ -459,6 +673,8 @@
     <button data-page="program"><span>▦</span><small>Program</small></button>
     <button data-page="search"><span>⌕</span><small>Search</small></button>
     <button data-page="map"><span>⌖</span><small>Venue</small></button>
+    <button data-page="perth"><span>☀</span><small>Perth</small></button>
+    <button data-page="sponsors"><span>◇</span><small>Sponsors</small></button>
     <button data-page="workshop"><span>▥</span><small>Workshop</small></button>
     <button data-page="my-program"><span>★</span><small>My Program</small></button>
   </nav>

@@ -12,5 +12,8 @@ window.CONFERENCE_CONFIG = {
     VENUES: "A4:J",
     ANNOUNCEMENTS: "A4:I",
     SETTINGS: "A4:D"
+  },
+  optionalSheets: {
+    SPONSORS: "A4:O"
   }
 };

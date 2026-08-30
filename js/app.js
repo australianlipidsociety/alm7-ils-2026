@@ -10,6 +10,7 @@ const DB = {
   speakers: [],
   venues: [],
   announcements: [],
+  sponsors: [],
   settings: {},
   loaded: false
 };
@@ -214,6 +215,7 @@ function buildDatabase(raw) {
   DB.speakers = raw.SPEAKERS;
   DB.venues = raw.VENUES;
   DB.announcements = raw.ANNOUNCEMENTS;
+  DB.sponsors = raw.SPONSORS || [];
   DB.settings = Object.fromEntries(raw.SETTINGS.filter(r => r.Setting).map(r => [String(r.Setting).trim(), r.Value]));
 
   DB.settings.StartDate = normaliseDate(DB.settings.StartDate);
@@ -282,6 +284,18 @@ async function loadConferenceData() {
     const entries = Object.entries(CONFIG.sheets);
     const results = await Promise.all(entries.map(([name, range]) => loadSheet(name, range)));
     const raw = Object.fromEntries(entries.map(([name], i) => [name, results[i]]));
+
+    const optionalEntries = Object.entries(CONFIG.optionalSheets || {});
+    const optionalResults = await Promise.all(optionalEntries.map(async ([name, range]) => {
+      try {
+        return [name, await loadSheet(name, range)];
+      } catch (error) {
+        console.info(`Optional sheet ${name} is not available yet.`);
+        return [name, []];
+      }
+    }));
+    optionalResults.forEach(([name, rows]) => { raw[name] = rows; });
+
     buildDatabase(raw);
     applySettings();
     initialiseProgramDay();
@@ -360,6 +374,8 @@ function toggleFavourite(id) {
   updateFavouriteCount();
   renderProgram();
   renderMyProgram();
+  renderAbstracts();
+  renderSpeakers();
 }
 
 function renderHome() {
@@ -553,11 +569,376 @@ function renderLoadError(error) {
 }
 
 
+
+function speakerInitials(name) {
+  return String(name || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || "").join("") || "?";
+}
+
+function speakerPhotoHTML(speaker, className = "") {
+  const url = String(speaker.PhotoURL || "").trim();
+  if (url) {
+    return `<img src="${escapeHTML(url)}" alt="${escapeHTML(speaker.DisplayName || "Speaker")}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;speaker-initials&quot;>${escapeHTML(speakerInitials(speaker.DisplayName))}</div>'">`;
+  }
+  return `<div class="speaker-initials">${escapeHTML(speakerInitials(speaker.DisplayName))}</div>`;
+}
+
+function getPresentationContext(presentation) {
+  const session = DB.sessions.find(s => s.SessionID === presentation.SessionID) || {};
+  const program = DB.program.find(item => item.sessionId === presentation.SessionID) || {};
+  return { session, program };
+}
+
+function getAbstractPresentation(abstractId) {
+  return DB.presentations.find(p => p.AbstractID === abstractId) || null;
+}
+
+function renderAbstracts() {
+  const list = document.querySelector("#abstract-list");
+  const count = document.querySelector("#abstract-count");
+  const search = document.querySelector("#abstract-search");
+  const topicSelect = document.querySelector("#abstract-topic-filter");
+  if (!list || !count || !topicSelect) return;
+
+  const topics = [...new Set(DB.abstracts.map(a => String(a.Topic || "").trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+  const currentTopic = topicSelect.value || "All";
+  topicSelect.innerHTML = `<option value="All">All topics</option>${topics.map(topic => `<option value="${escapeHTML(topic)}">${escapeHTML(topic)}</option>`).join("")}`;
+  topicSelect.value = topics.includes(currentTopic) ? currentTopic : "All";
+
+  const query = String(search?.value || "").trim().toLowerCase();
+  const selectedTopic = topicSelect.value || "All";
+
+  const abstracts = DB.abstracts
+    .filter(a => a.AbstractID || a.Title)
+    .filter(a => {
+      if (selectedTopic !== "All" && String(a.Topic || "") !== selectedTopic) return false;
+      if (!query) return true;
+      const haystack = [
+        a.Title, a.Authors, a.Affiliations, a.AbstractText, a.Keywords,
+        a.Topic, a.CorrespondingAuthor, a.SubmissionNumber
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    })
+    .sort((a, b) => String(a.Title || "").localeCompare(String(b.Title || "")));
+
+  count.textContent = `${abstracts.length} abstract${abstracts.length === 1 ? "" : "s"}`;
+
+  if (!abstracts.length) {
+    list.innerHTML = `<div class="directory-empty">No abstracts match your search.</div>`;
+    return;
+  }
+
+  list.innerHTML = abstracts.map(abs => {
+    const presentation = getAbstractPresentation(abs.AbstractID);
+    const context = presentation ? getPresentationContext(presentation) : {};
+    const presentationType = presentation?.PresentationType || "";
+    const topic = abs.Topic || "";
+    const preview = String(abs.AbstractText || "").replace(/\s+/g, " ").trim();
+    const shortPreview = preview.length > 240 ? `${preview.slice(0, 237)}…` : preview;
+    const sessionTitle = context.session?.SessionTitle || "";
+    return `<article class="abstract-card">
+      <div class="abstract-card-main">
+        <div class="abstract-badges">
+          ${presentationType ? `<span class="abstract-badge">${escapeHTML(presentationType)}</span>` : ""}
+          ${topic ? `<span class="abstract-badge topic">${escapeHTML(topic)}</span>` : ""}
+        </div>
+        <h3>${escapeHTML(abs.Title || presentation?.Title || "Untitled abstract")}</h3>
+        ${abs.Authors ? `<div class="abstract-authors">${escapeHTML(abs.Authors)}</div>` : ""}
+        ${abs.Affiliations ? `<div class="abstract-affiliations">${escapeHTML(abs.Affiliations)}</div>` : ""}
+        ${sessionTitle ? `<div class="abstract-affiliations"><strong>Session:</strong> ${escapeHTML(sessionTitle)}</div>` : ""}
+        ${shortPreview ? `<div class="abstract-preview">${escapeHTML(shortPreview)}</div>` : ""}
+        ${abs.Keywords ? `<div class="abstract-keywords"><strong>Keywords:</strong> ${escapeHTML(abs.Keywords)}</div>` : ""}
+      </div>
+      <button class="abstract-open" type="button" data-open-abstract="${escapeHTML(abs.AbstractID)}">View abstract</button>
+    </article>`;
+  }).join("");
+}
+
+function openAbstract(abstractId) {
+  const abs = DB.abstracts.find(a => String(a.AbstractID) === String(abstractId));
+  const modal = document.querySelector("#abstract-modal");
+  const content = document.querySelector("#abstract-modal-content");
+  if (!abs || !modal || !content) return;
+
+  const presentation = getAbstractPresentation(abs.AbstractID);
+  const { session, program } = presentation ? getPresentationContext(presentation) : { session: {}, program: {} };
+
+  const scheduleBits = [];
+  if (program?.date) scheduleBits.push(formatDate(program.date));
+  if (presentation?.StartTime) {
+    const start = normaliseTime(presentation.StartTime);
+    const end = normaliseTime(presentation.EndTime);
+    scheduleBits.push(`${formatTime(start)}${end ? `–${formatTime(end)}` : ""}`);
+  }
+  if (program?.room) scheduleBits.push(program.room);
+
+  content.innerHTML = `
+    <span class="eyebrow">${escapeHTML(presentation?.PresentationType || abs.Topic || "Conference abstract")}</span>
+    <h2 id="abstract-modal-title">${escapeHTML(abs.Title || presentation?.Title || "Untitled abstract")}</h2>
+    ${abs.Authors ? `<div class="abstract-modal-authors">${escapeHTML(abs.Authors)}</div>` : ""}
+    ${abs.Affiliations ? `<div class="abstract-modal-affiliations">${escapeHTML(abs.Affiliations)}</div>` : ""}
+    ${session?.SessionTitle ? `<div class="abstract-modal-meta"><strong>Session:</strong> ${escapeHTML(session.SessionTitle)}</div>` : ""}
+    ${scheduleBits.length ? `<div class="abstract-modal-meta">${escapeHTML(scheduleBits.join(" • "))}</div>` : ""}
+    ${abs.AbstractText ? `<div class="abstract-modal-body">${escapeHTML(abs.AbstractText)}</div>` : `<div class="abstract-modal-body">Abstract text is not yet available.</div>`}
+    ${abs.Keywords ? `<div class="abstract-modal-keywords"><strong>Keywords:</strong> ${escapeHTML(abs.Keywords)}</div>` : ""}
+  `;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeDirectoryModal(which) {
+  const modal = document.querySelector(which === "speaker" ? "#speaker-modal" : "#abstract-modal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  if (!document.querySelector(".directory-modal.open, .facilitator-modal.open, .modal.open")) {
+    document.body.style.overflow = "";
+  }
+}
+
+function getSpeakerPresentations(speaker) {
+  const id = String(speaker.SpeakerID || "");
+  const displayName = String(speaker.DisplayName || "").trim().toLowerCase();
+  return DB.presentations.filter(p => {
+    if (id && String(p.SpeakerID || "") === id) return true;
+    return displayName && String(p.SpeakerDisplay || "").trim().toLowerCase() === displayName;
+  });
+}
+
+function renderSpeakers() {
+  const grid = document.querySelector("#speaker-grid");
+  const count = document.querySelector("#speaker-count");
+  const search = document.querySelector("#speaker-search");
+  if (!grid || !count) return;
+
+  const query = String(search?.value || "").trim().toLowerCase();
+
+  const speakers = DB.speakers
+    .filter(s => String(s.DisplayName || "").trim())
+    .filter(s => {
+      if (!query) return true;
+      return [s.DisplayName, s.Affiliation, s.Country, s.Bio].join(" ").toLowerCase().includes(query);
+    })
+    .sort((a, b) => {
+      const featuredA = /^(yes|true|1)$/i.test(String(a.Featured || "")) ? 0 : 1;
+      const featuredB = /^(yes|true|1)$/i.test(String(b.Featured || "")) ? 0 : 1;
+      return featuredA - featuredB || String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName));
+    });
+
+  count.textContent = `${speakers.length} speaker${speakers.length === 1 ? "" : "s"}`;
+
+  if (!speakers.length) {
+    grid.innerHTML = `<div class="directory-empty">No speakers match your search.</div>`;
+    return;
+  }
+
+  grid.innerHTML = speakers.map(s => {
+    const talks = getSpeakerPresentations(s);
+    return `<button class="speaker-card-live" type="button" data-open-speaker="${escapeHTML(s.SpeakerID)}">
+      <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}</div>
+      <div class="speaker-card-copy">
+        <h3>${escapeHTML(s.DisplayName)}</h3>
+        <div class="speaker-affiliation">${escapeHTML(s.Affiliation || "")}</div>
+        ${s.Country ? `<div class="speaker-country">${escapeHTML(s.Country)}</div>` : ""}
+        ${talks.length ? `<span class="speaker-talk-count">${talks.length} presentation${talks.length === 1 ? "" : "s"}</span>` : ""}
+      </div>
+    </button>`;
+  }).join("");
+}
+
+function openSpeaker(speakerId) {
+  const speaker = DB.speakers.find(s => String(s.SpeakerID) === String(speakerId));
+  const modal = document.querySelector("#speaker-modal");
+  const content = document.querySelector("#speaker-modal-content");
+  if (!speaker || !modal || !content) return;
+
+  const talks = getSpeakerPresentations(speaker);
+  const talkHTML = talks.length ? talks.map(p => {
+    const { session, program } = getPresentationContext(p);
+    const abs = DB.abstracts.find(a => a.AbstractID === p.AbstractID) || {};
+    const time = normaliseTime(p.StartTime);
+    const meta = [
+      program.date ? formatDate(program.date) : "",
+      time ? formatTime(time) : "",
+      session.SessionTitle || "",
+      program.room || ""
+    ].filter(Boolean).join(" • ");
+    return `<div class="speaker-presentation-row">
+      <strong>${escapeHTML(p.Title || abs.Title || "Presentation")}</strong>
+      ${meta ? `<div class="speaker-presentation-meta">${escapeHTML(meta)}</div>` : ""}
+      ${p.AbstractID ? `<button type="button" data-speaker-open-abstract="${escapeHTML(p.AbstractID)}">View abstract →</button>` : ""}
+    </div>`;
+  }).join("") : `<div class="directory-empty">No linked presentations are currently published.</div>`;
+
+  content.innerHTML = `
+    <div class="speaker-modal-profile">
+      <div class="speaker-modal-photo">${speakerPhotoHTML(speaker)}</div>
+      <div>
+        <span class="eyebrow">Speaker profile</span>
+        <h2 id="speaker-modal-name">${escapeHTML(speaker.DisplayName)}</h2>
+        ${speaker.Affiliation ? `<p class="speaker-modal-role">${escapeHTML(speaker.Affiliation)}</p>` : ""}
+        ${speaker.Country ? `<div class="speaker-country">${escapeHTML(speaker.Country)}</div>` : ""}
+      </div>
+    </div>
+    ${speaker.Bio ? `<div class="speaker-modal-bio">${escapeHTML(speaker.Bio)}</div>` : ""}
+    <div class="speaker-presentations">
+      <h3>Conference presentations</h3>
+      ${talkHTML}
+    </div>
+  `;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+
+const SPONSOR_TIER_ORDER = ["Platinum", "Gold", "Silver", "Bronze", "Award"];
+
+function sponsorTier(value) {
+  const raw = String(value || "").trim();
+  const match = SPONSOR_TIER_ORDER.find(t => t.toLowerCase() === raw.toLowerCase());
+  return match || raw || "Other";
+}
+
+function sponsorLogoHTML(sponsor) {
+  const url = String(sponsor.LogoURL || "").trim();
+  if (url) {
+    return `<img src="${escapeHTML(url)}" alt="${escapeHTML(sponsor.Name || "Sponsor")} logo" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'sponsor-logo-fallback',textContent:${JSON.stringify(String(sponsor.Name || "Sponsor"))}}))">`;
+  }
+  return `<div class="sponsor-logo-fallback">${escapeHTML(sponsor.Name || "Sponsor")}</div>`;
+}
+
+function getSponsorScience(sponsor) {
+  const presentation = sponsor.PresentationID
+    ? DB.presentations.find(p => String(p.PresentationID) === String(sponsor.PresentationID))
+    : null;
+  const abstract = sponsor.AbstractID
+    ? DB.abstracts.find(a => String(a.AbstractID) === String(sponsor.AbstractID))
+    : (presentation?.AbstractID ? DB.abstracts.find(a => a.AbstractID === presentation.AbstractID) : null);
+
+  const linkedProgram = presentation?.SessionID
+    ? DB.program.find(item => item.sessionId === presentation.SessionID)
+    : null;
+
+  return {
+    title: sponsor.PosterTitle || presentation?.Title || abstract?.Title || "",
+    abstractText: sponsor.PosterAbstract || abstract?.AbstractText || "",
+    abstractId: abstract?.AbstractID || sponsor.AbstractID || "",
+    time: sponsor.PosterTime || (presentation?.StartTime ? formatTime(normaliseTime(presentation.StartTime)) : ""),
+    location: sponsor.PosterLocation || linkedProgram?.room || "",
+    authors: abstract?.Authors || presentation?.AuthorsDisplay || "",
+    affiliations: abstract?.Affiliations || presentation?.AffiliationsDisplay || ""
+  };
+}
+
+function renderSponsors() {
+  const holder = document.querySelector("#sponsors-content");
+  if (!holder) return;
+
+  const sponsors = DB.sponsors
+    .filter(s => {
+      const status = String(s.Status || "Published").trim().toLowerCase();
+      return (status === "" || status === "published") && String(s.Name || "").trim();
+    })
+    .sort((a,b) => {
+      const ta = SPONSOR_TIER_ORDER.indexOf(sponsorTier(a.Tier));
+      const tb = SPONSOR_TIER_ORDER.indexOf(sponsorTier(b.Tier));
+      const oa = Number(a.DisplayOrder || 999);
+      const ob = Number(b.DisplayOrder || 999);
+      return (ta < 0 ? 99 : ta) - (tb < 0 ? 99 : tb) || oa - ob || String(a.Name).localeCompare(String(b.Name));
+    });
+
+  if (!sponsors.length) {
+    holder.innerHTML = `<div class="sponsor-empty"><strong>Sponsor showcase coming soon</strong>Logo, tier, website and scientific contribution details will appear here as sponsor information is added.</div>`;
+    return;
+  }
+
+  const tiers = [...new Set(sponsors.map(s => sponsorTier(s.Tier)))];
+  holder.innerHTML = tiers.map(tier => {
+    const rows = sponsors.filter(s => sponsorTier(s.Tier) === tier);
+    const tierClass = tier.toLowerCase().replace(/\s+/g,"-");
+    return `<section class="sponsor-tier-section">
+      <div class="sponsor-tier-heading">
+        <span class="sponsor-tier-chip ${escapeHTML(tierClass)}">${escapeHTML(tier)}</span>
+        <h2>${escapeHTML(tier)} Sponsor${rows.length === 1 ? "" : "s"}</h2>
+      </div>
+      <div class="sponsor-grid">
+        ${rows.map(sponsor => renderSponsorCard(sponsor, tier)).join("")}
+      </div>
+    </section>`;
+  }).join("");
+}
+
+function renderSponsorCard(sponsor, tier) {
+  const science = getSponsorScience(sponsor);
+  const lower = tier.toLowerCase();
+  const isPlatinum = lower === "platinum";
+  const isExhibitor = lower === "gold" || lower === "silver";
+
+  let scienceHTML = "";
+  if ((isPlatinum || isExhibitor) && science.title) {
+    scienceHTML = `<div class="sponsor-science">
+      <strong>${isPlatinum ? "Sponsored presentation" : "Sponsor poster"}: ${escapeHTML(science.title)}</strong>
+      ${science.time || science.location ? `<small>${escapeHTML([science.time, science.location || (isExhibitor ? "Silver Room" : "")].filter(Boolean).join(" • "))}</small>` : ""}
+    </div>`;
+  }
+
+  const abstractAvailable = Boolean(science.abstractText || science.abstractId);
+  const website = String(sponsor.Website || "").trim();
+
+  return `<article class="sponsor-card ${escapeHTML(lower)}">
+    <div class="sponsor-logo-wrap">${sponsorLogoHTML(sponsor)}</div>
+    <div class="sponsor-copy">
+      <h3>${escapeHTML(sponsor.Name)}</h3>
+      ${sponsor.Description ? `<p>${escapeHTML(sponsor.Description)}</p>` : ""}
+      ${isExhibitor ? `<div class="silver-room-note">⌖ Located in the Silver Room</div>` : ""}
+      ${scienceHTML}
+      <div class="sponsor-actions">
+        ${website ? `<a class="sponsor-link" href="${escapeHTML(website)}" target="_blank" rel="noopener">Visit website ↗</a>` : ""}
+        ${abstractAvailable ? `<button class="sponsor-abstract-button" type="button" data-sponsor-abstract="${escapeHTML(sponsor.SponsorID || sponsor.Name)}">${isPlatinum ? "View talk abstract" : "View poster abstract"}</button>` : ""}
+      </div>
+    </div>
+  </article>`;
+}
+
+function openSponsorAbstract(sponsorId) {
+  const sponsor = DB.sponsors.find(s => String(s.SponsorID || s.Name) === String(sponsorId));
+  const modal = document.querySelector("#sponsor-abstract-modal");
+  const content = document.querySelector("#sponsor-abstract-content");
+  if (!sponsor || !modal || !content) return;
+
+  const tier = sponsorTier(sponsor.Tier);
+  const science = getSponsorScience(sponsor);
+  content.innerHTML = `
+    <span class="eyebrow">${escapeHTML(tier)} sponsor</span>
+    <h2 id="sponsor-abstract-title">${escapeHTML(science.title || sponsor.Name)}</h2>
+    ${science.authors ? `<div class="abstract-modal-authors">${escapeHTML(science.authors)}</div>` : ""}
+    ${science.affiliations ? `<div class="abstract-modal-affiliations">${escapeHTML(science.affiliations)}</div>` : ""}
+    ${(science.time || science.location || ["Gold","Silver"].includes(tier)) ? `<div class="abstract-modal-meta">${escapeHTML([science.time, science.location || (["Gold","Silver"].includes(tier) ? "Silver Room" : "")].filter(Boolean).join(" • "))}</div>` : ""}
+    <div class="sponsor-abstract-body">${science.abstractText ? escapeHTML(science.abstractText) : "Abstract text is not yet available."}</div>
+  `;
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSponsorAbstract() {
+  const modal = document.querySelector("#sponsor-abstract-modal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+}
+
 function renderAll() {
   updateFavouriteCount();
   renderHome();
   renderProgram();
   renderMyProgram();
+  renderSponsors();
 }
 
 function showPage(page) {
@@ -593,6 +974,45 @@ document.addEventListener("keydown", event => { if (event.key === "Escape") clos
 
 updateFavouriteCount();
 loadConferenceData();
+
+
+
+document.querySelector("#abstract-search")?.addEventListener("input", renderAbstracts);
+document.querySelector("#abstract-topic-filter")?.addEventListener("change", renderAbstracts);
+document.querySelector("#speaker-search")?.addEventListener("input", renderSpeakers);
+
+document.addEventListener("click", event => {
+  const abstractButton = event.target.closest("[data-open-abstract]");
+  if (abstractButton) {
+    openAbstract(abstractButton.dataset.openAbstract);
+    return;
+  }
+
+  const speakerButton = event.target.closest("[data-open-speaker]");
+  if (speakerButton) {
+    openSpeaker(speakerButton.dataset.openSpeaker);
+    return;
+  }
+
+  const fromSpeaker = event.target.closest("[data-speaker-open-abstract]");
+  if (fromSpeaker) {
+    closeDirectoryModal("speaker");
+    openAbstract(fromSpeaker.dataset.speakerOpenAbstract);
+    return;
+  }
+
+  const closer = event.target.closest("[data-close-directory-modal]");
+  if (closer) {
+    closeDirectoryModal(closer.dataset.closeDirectoryModal);
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeDirectoryModal("abstract");
+    closeDirectoryModal("speaker");
+  }
+});
 
 
 const WORKSHOP_FACILITATORS = {
@@ -645,7 +1065,20 @@ function closeFacilitator() {
   document.body.style.overflow = "";
 }
 
+document.addEventListener("click", event => {
+  const card = event.target.closest("[data-facilitator]");
+  if (card) {
+    event.preventDefault();
+    openFacilitator(card.dataset.facilitator);
+    return;
+  }
+
+  if (event.target.closest("#facilitator-modal .modal-close") ||
+      event.target.closest("#facilitator-modal .facilitator-modal-backdrop")) {
+    closeFacilitator();
+  }
+});
+
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") closeFacilitator();
 });
-
