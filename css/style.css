@@ -1095,3 +1095,108 @@ h2 { font-size: 28px; }
   .venue-map-wrap { overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
   .venue-map-wrap::after { content: "Swipe map ↔"; position: sticky; right: 8px; align-self: flex-end; margin: 0 8px 8px -110px; padding: 5px 8px; border-radius: 999px; background: rgba(23,63,103,.88); color: #fff; font-size: 10px; font-weight: 800; white-space: nowrap; }
 }
+
+
+/* ANPC venue */
+.anpc-venue-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, .9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--white);
+}
+.anpc-details h2 { margin: 4px 0 8px; color: var(--navy); font-size: 30px; }
+.anpc-details > p { color: var(--muted); }
+.anpc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 20px; }
+.secondary-map-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 11px 14px; border: 1px solid #BFD5DC; border-radius: 9px;
+  color: var(--teal); background: #F4FAFB; font-weight: 800; text-decoration: none;
+}
+.anpc-travel-card {
+  padding: 18px; border: 1px solid #DED4EA; border-radius: 14px;
+  background: #FAF7FD; color: var(--ink); font-size: 13px; line-height: 1.55;
+}
+.anpc-travel-card > strong { color: #704A9D; }
+.anpc-travel-card ol { margin: 12px 0 12px 20px; padding: 0; }
+.anpc-travel-card li + li { margin-top: 6px; }
+.sunday-note {
+  margin-top: 12px; padding: 10px 12px; border-radius: 10px;
+  color: #7C541A; background: #FFF8E8; border: 1px solid #F0DFC1;
+}
+.sunday-note.compact { font-size: 12px; }
+.transperth-link { display: inline-block; margin-top: 12px; color: #704A9D; font-weight: 800; text-decoration: none; }
+.anpc-gallery { min-width: 0; display: grid; grid-template-columns: 1.35fr .85fr; gap: 12px; align-items: stretch; }
+.anpc-photo {
+  min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--line);
+  border-radius: 14px; background: #F5F7F8;
+}
+.anpc-photo img { width: 100%; height: 210px; display: block; object-fit: cover; }
+.anpc-photo-large { grid-row: span 2; }
+.anpc-photo-large img { height: 100%; min-height: 430px; }
+.anpc-photo figcaption { padding: 8px 10px; color: var(--muted); font-size: 10px; }
+.anpc-gallery-link {
+  align-self: end; padding: 12px; border: 1px solid #D8E4E8; border-radius: 12px;
+  color: var(--teal); background: #F7FBFC; font-size: 12px; font-weight: 800; text-decoration: none;
+}
+
+/* Workshop page */
+.workshop-page { width: min(1180px, calc(100% - 36px)); margin: 0 auto; padding: 48px 0 120px; }
+.workshop-hero {
+  display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 20px; background: var(--white);
+  box-shadow: 0 10px 32px rgba(23,63,103,.08);
+}
+.workshop-hero-copy { padding: 42px; align-self: center; }
+.workshop-hero-copy h1 { margin: 5px 0 12px; color: var(--navy); font-size: clamp(34px, 5vw, 58px); }
+.workshop-hero-copy .primary-button { margin-top: 14px; }
+.workshop-hero > img { width: 100%; height: 100%; min-height: 360px; object-fit: cover; }
+.workshop-content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; margin-top: 22px; }
+.workshop-agenda-card, .workshop-side-card {
+  padding: 26px; border: 1px solid var(--line); border-radius: 17px; background: var(--white);
+}
+.workshop-side-card h3 { margin: 5px 0 8px; color: var(--navy); font-size: 22px; }
+.workshop-side-card p { color: var(--muted); line-height: 1.55; }
+.workshop-agenda { margin-top: 8px; }
+.workshop-agenda-item {
+  display: grid; grid-template-columns: 105px 1fr; gap: 18px;
+  padding: 16px 0; border-top: 1px solid var(--line);
+}
+.workshop-agenda-item:first-child { border-top: 0; }
+.workshop-agenda-time { color: var(--teal); font-size: 13px; font-weight: 900; }
+.workshop-agenda-title { color: var(--navy); font-weight: 800; }
+.workshop-agenda-meta { margin-top: 4px; color: var(--muted); font-size: 12px; }
+.workshop-agenda-empty {
+  padding: 26px; border-radius: 13px; color: var(--muted); background: #F7F9FA; text-align: center;
+}
+
+@media (max-width: 900px) {
+  .anpc-venue-grid, .workshop-hero, .workshop-content-grid { grid-template-columns: 1fr; }
+  .anpc-gallery { grid-template-columns: 1fr 1fr; }
+  .anpc-photo-large { grid-row: auto; grid-column: span 2; }
+  .anpc-photo-large img { min-height: 300px; }
+  .workshop-hero-copy { padding: 28px 22px; }
+  .workshop-hero > img { min-height: 260px; }
+}
+@media (max-width: 600px) {
+  .anpc-venue-grid { padding: 18px; }
+  .anpc-gallery { grid-template-columns: 1fr; }
+  .anpc-photo-large { grid-column: auto; }
+  .anpc-photo-large img, .anpc-photo img { min-height: 0; height: 230px; }
+  .workshop-page { width: calc(100% - 30px); padding-top: 32px; }
+  .workshop-agenda-item { grid-template-columns: 82px 1fr; gap: 10px; }
+  .mobile-nav { grid-template-columns: repeat(5, 1fr); }
+  .mobile-nav small { font-size: 9px; }
+}
+
+.workshop-site-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.workshop-site-link:hover { text-decoration: underline; }

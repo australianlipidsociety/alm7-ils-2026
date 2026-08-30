@@ -360,6 +360,7 @@ function toggleFavourite(id) {
   updateFavouriteCount();
   renderProgram();
   renderMyProgram();
+  renderWorkshopAgenda();
 }
 
 function renderHome() {
@@ -550,6 +551,36 @@ function renderLoadError(error) {
   document.querySelector("#happening-now").innerHTML = `<div class="event-title">Program connection unavailable</div>`;
   document.querySelector("#up-next").innerHTML = `<div class="event-meta">Please refresh to try again.</div>`;
   document.querySelector("#today-program").innerHTML = "";
+}
+
+
+function renderWorkshopAgenda() {
+  const box = document.querySelector("#workshop-agenda");
+  if (!box) return;
+
+  const items = DB.program.filter(item => {
+    const haystack = `${item.type} ${item.title} ${item.description} ${item.room} ${item.venueId}`.toLowerCase();
+    return item.type.toLowerCase() === "workshop" ||
+      haystack.includes("phenome") ||
+      haystack.includes("anpc") ||
+      haystack.includes("workshop");
+  });
+
+  if (!items.length) {
+    box.innerHTML = `<div class="workshop-agenda-empty"><strong>Workshop agenda coming soon.</strong><br>Add published workshop rows to the PROGRAM sheet and they will appear here automatically.</div>`;
+    return;
+  }
+
+  box.innerHTML = items.map(item => `
+    <div class="workshop-agenda-item">
+      <div class="workshop-agenda-time">${escapeHTML(formatTime(item.start))}${item.end ? `–${escapeHTML(formatTime(item.end))}` : ""}</div>
+      <div>
+        <div class="workshop-agenda-title">${escapeHTML(item.title)}</div>
+        <div class="workshop-agenda-meta">${escapeHTML([item.speaker, item.room].filter(Boolean).join(" • "))}</div>
+        ${item.description ? `<div class="workshop-agenda-meta">${escapeHTML(item.description)}</div>` : ""}
+      </div>
+    </div>
+  `).join("");
 }
 
 function renderAll() {
