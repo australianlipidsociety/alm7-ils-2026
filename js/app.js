@@ -112,13 +112,32 @@ function daysBetween(a, b) {
   return Math.ceil((d2 - d1) / 86400000);
 }
 
-function setDataStatus(kind, message, autoHide = false) {
+let loadingIndicatorTimer = null;
+
+function showLoadingIndicator() {
   const el = document.querySelector("#data-status");
   if (!el) return;
-  el.className = `data-status ${kind}`;
-  el.innerHTML = message;
+  clearTimeout(loadingIndicatorTimer);
+  loadingIndicatorTimer = setTimeout(() => {
+    el.className = "data-status loading";
+    el.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span class="sr-only">Loading conference program</span>';
+    el.hidden = false;
+  }, 350);
+}
+
+function hideDataStatus() {
+  clearTimeout(loadingIndicatorTimer);
+  const el = document.querySelector("#data-status");
+  if (el) el.hidden = true;
+}
+
+function showDataError(message = "We’re having trouble loading the program. Please refresh and try again.") {
+  clearTimeout(loadingIndicatorTimer);
+  const el = document.querySelector("#data-status");
+  if (!el) return;
+  el.className = "data-status error";
+  el.textContent = message;
   el.hidden = false;
-  if (autoHide) setTimeout(() => { el.hidden = true; }, 2600);
 }
 
 // Google Visualization JSONP loader. This avoids CORS problems when testing the app locally.
@@ -251,7 +270,7 @@ function buildDatabase(raw) {
 }
 
 async function loadConferenceData() {
-  setDataStatus("loading", "<span class='status-dot'></span> Connecting to the live Google Sheet…");
+  showLoadingIndicator();
   try {
     const entries = Object.entries(CONFIG.sheets);
     const results = await Promise.all(entries.map(([name, range]) => loadSheet(name, range)));
@@ -260,11 +279,11 @@ async function loadConferenceData() {
     applySettings();
     initialiseProgramDay();
     renderAll();
-    setDataStatus("success", "<span class='status-dot'></span> Live program connected to Google Sheets", true);
+    hideDataStatus();
   } catch (error) {
     console.error(error);
     renderLoadError(error);
-    setDataStatus("error", `<strong>Couldn't load the live program.</strong> ${escapeHTML(error.message)}. Check that the Google Sheet is still published to the web, then refresh.`);
+    showDataError();
   }
 }
 
