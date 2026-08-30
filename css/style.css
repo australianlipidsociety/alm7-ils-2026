@@ -1200,3 +1200,148 @@ h2 { font-size: 28px; }
   text-decoration: none;
 }
 .workshop-site-link:hover { text-decoration: underline; }
+
+
+/* Workshop facilitator cards */
+.facilitators-section {
+  margin: 24px 0;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--white);
+}
+.facilitators-section .section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+.facilitators-section .section-heading h2 { margin: 4px 0 0; color: var(--navy); }
+.facilitators-section .section-heading > p { margin: 0; color: var(--muted); font-size: 13px; }
+.facilitator-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.facilitator-card {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.facilitator-card:hover {
+  transform: translateY(-2px);
+  border-color: #BBD8E0;
+  box-shadow: 0 10px 24px rgba(23,63,103,.09);
+}
+.facilitator-card img {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.facilitator-card h3 { margin: 0 0 4px; color: var(--navy); font-size: 17px; }
+.facilitator-card p { margin: 0 0 7px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.facilitator-card span { color: var(--teal); font-size: 11px; font-weight: 800; }
+
+.agenda-session {
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  overflow: hidden;
+}
+.agenda-session-heading {
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #F2F8FA, #FAFCFD);
+  border-bottom: 1px solid var(--line);
+}
+.agenda-session-heading span {
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.agenda-session-heading h3 { margin: 4px 0 0; color: var(--navy); font-size: 19px; }
+.agenda-session .workshop-agenda { margin: 0; padding: 0 18px; }
+.agenda-break {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  gap: 18px;
+  margin: 16px 0;
+  padding: 18px;
+  border-radius: 14px;
+  background: #FFF8E8;
+  border: 1px solid #F0DFC1;
+}
+.agenda-break strong { display: block; color: #7C541A; }
+.agenda-break span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+
+.facilitator-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.facilitator-modal.open { display: flex; }
+.facilitator-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 29, 49, .6);
+  backdrop-filter: blur(3px);
+}
+.facilitator-modal-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+  width: min(720px, 100%);
+  padding: 26px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0,0,0,.25);
+}
+.facilitator-modal-card > img {
+  width: 180px;
+  height: 180px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+.facilitator-modal-copy h2 { margin: 5px 0 4px; color: var(--navy); }
+.facilitator-role { margin: 0 0 14px; color: var(--teal); font-weight: 800; }
+.facilitator-modal-copy p:last-child { color: var(--ink); line-height: 1.65; }
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #F2F4F6;
+  color: var(--navy);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .facilitator-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .facilitators-section { padding: 18px; }
+  .facilitators-section .section-heading { align-items: start; flex-direction: column; }
+  .facilitator-card { grid-template-columns: 76px 1fr; }
+  .facilitator-card img { width: 76px; height: 76px; }
+  .facilitator-modal-card { grid-template-columns: 1fr; max-height: 86vh; overflow: auto; }
+  .facilitator-modal-card > img { width: 120px; height: 120px; }
+  .agenda-break { grid-template-columns: 82px 1fr; gap: 10px; }
+}

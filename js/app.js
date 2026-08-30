@@ -360,7 +360,6 @@ function toggleFavourite(id) {
   updateFavouriteCount();
   renderProgram();
   renderMyProgram();
-  renderWorkshopAgenda();
 }
 
 function renderHome() {
@@ -554,35 +553,6 @@ function renderLoadError(error) {
 }
 
 
-function renderWorkshopAgenda() {
-  const box = document.querySelector("#workshop-agenda");
-  if (!box) return;
-
-  const items = DB.program.filter(item => {
-    const haystack = `${item.type} ${item.title} ${item.description} ${item.room} ${item.venueId}`.toLowerCase();
-    return item.type.toLowerCase() === "workshop" ||
-      haystack.includes("phenome") ||
-      haystack.includes("anpc") ||
-      haystack.includes("workshop");
-  });
-
-  if (!items.length) {
-    box.innerHTML = `<div class="workshop-agenda-empty"><strong>Workshop agenda coming soon.</strong><br>Add published workshop rows to the PROGRAM sheet and they will appear here automatically.</div>`;
-    return;
-  }
-
-  box.innerHTML = items.map(item => `
-    <div class="workshop-agenda-item">
-      <div class="workshop-agenda-time">${escapeHTML(formatTime(item.start))}${item.end ? `–${escapeHTML(formatTime(item.end))}` : ""}</div>
-      <div>
-        <div class="workshop-agenda-title">${escapeHTML(item.title)}</div>
-        <div class="workshop-agenda-meta">${escapeHTML([item.speaker, item.room].filter(Boolean).join(" • "))}</div>
-        ${item.description ? `<div class="workshop-agenda-meta">${escapeHTML(item.description)}</div>` : ""}
-      </div>
-    </div>
-  `).join("");
-}
-
 function renderAll() {
   updateFavouriteCount();
   renderHome();
@@ -623,3 +593,59 @@ document.addEventListener("keydown", event => { if (event.key === "Escape") clos
 
 updateFavouriteCount();
 loadConferenceData();
+
+
+const WORKSHOP_FACILITATORS = {
+  philipp: {
+    name: "Dr Philipp Nitschke",
+    role: "NMR Lead, Australian National Phenome Centre",
+    photo: "assets/philipp-nitschke.jpg",
+    bio: "Philipp leads NMR at the ANPC and develops advanced nuclear magnetic resonance methods for high-throughput metabolic phenotyping. His work focuses on quantitative lipoprotein, lipidomic and metabolite profiling, with applications in systemic biomarker discovery for complex disease and inflammatory responses."
+  },
+  reika: {
+    name: "Dr Reika Masuda",
+    role: "Lead Bioinformatician, Australian National Phenome Centre",
+    photo: "assets/reika-masuda.jpg",
+    bio: "Reika leads bioinformatics at the ANPC, applying advanced computational modelling and machine learning to large-scale metabolic and lipidomic datasets. Her research focuses on integrating complex omics data to identify systemic biomarkers linked to cardiovascular risk, infectious disease and inflammatory responses."
+  },
+  luke: {
+    name: "Dr Luke Whiley",
+    role: "Senior Lecturer, Curtin University; Adjunct, Australian National Phenome Centre",
+    photo: "assets/luke-whiley.png",
+    bio: "Luke leads the Lipid and Metabolic Phenotype Group within the Curtin Medical Research Institute and holds an adjunct appointment at the ANPC. His research spans targeted and untargeted LC-MS lipidomics across neurodegeneration, inflammatory injury and large human cohort studies."
+  }
+};
+
+function openFacilitator(id) {
+  const person = WORKSHOP_FACILITATORS[id];
+  const modal = document.querySelector("#facilitator-modal");
+  if (!person || !modal) return;
+
+  const photo = document.querySelector("#facilitator-modal-photo");
+  const name = document.querySelector("#facilitator-modal-name");
+  const role = document.querySelector("#facilitator-modal-role");
+  const bio = document.querySelector("#facilitator-modal-bio");
+
+  photo.src = person.photo;
+  photo.alt = person.name;
+  name.textContent = person.name;
+  role.textContent = person.role;
+  bio.textContent = person.bio;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeFacilitator() {
+  const modal = document.querySelector("#facilitator-modal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeFacilitator();
+});
+

@@ -286,13 +286,53 @@
           <div class="workshop-hero-copy">
             <span class="eyebrow">Pre-conference workshop</span>
             <h1>ANPC Workshop</h1>
-            <p class="page-intro">Workshop agenda, venue information and travel details for the Australian National Phenome Centre.</p>
+            <p class="page-intro">A practical introduction to NMR lipoprotein profiling and LC-MS lipidomics — from study design and sample handling through to quality control, interpretation and reporting.</p>
             <div class="workshop-hero-actions">
               <button class="primary-button" onclick="showPage('map'); showVenueTab('workshop')"><span>Venue &amp; directions</span><span>→</span></button>
+              <a class="secondary-map-button" href="https://www.murdoch.edu.au/research/anpc" target="_blank" rel="noopener">ANPC website ↗</a>
             </div>
           </div>
           <img src="assets/anpc-workshop.png" alt="Australian National Phenome Centre workshop space">
         </div>
+
+        <section class="facilitators-section">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Meet the facilitators</span>
+              <h2>Workshop Facilitators</h2>
+            </div>
+            <p>Tap a facilitator to read their bio.</p>
+          </div>
+
+          <div class="facilitator-grid">
+            <button class="facilitator-card" onclick="openFacilitator('philipp')">
+              <img src="assets/philipp-nitschke.jpg" alt="Dr Philipp Nitschke">
+              <div>
+                <h3>Dr Philipp Nitschke</h3>
+                <p>NMR Lead, Australian National Phenome Centre</p>
+                <span>NMR • lipoprotein profiling • metabolic phenotyping</span>
+              </div>
+            </button>
+
+            <button class="facilitator-card" onclick="openFacilitator('reika')">
+              <img src="assets/reika-masuda.jpg" alt="Dr Reika Masuda">
+              <div>
+                <h3>Dr Reika Masuda</h3>
+                <p>Lead Bioinformatician, Australian National Phenome Centre</p>
+                <span>Bioinformatics • machine learning • multi-omics</span>
+              </div>
+            </button>
+
+            <button class="facilitator-card" onclick="openFacilitator('luke')">
+              <img src="assets/luke-whiley.png" alt="Dr Luke Whiley">
+              <div>
+                <h3>Dr Luke Whiley</h3>
+                <p>Senior Lecturer, Curtin University</p>
+                <span>LC-MS lipidomics • human cohorts • metabolic phenotyping</span>
+              </div>
+            </button>
+          </div>
+        </section>
 
         <div class="workshop-content-grid">
           <section class="workshop-agenda-card">
@@ -302,7 +342,71 @@
                 <h2>Agenda</h2>
               </div>
             </div>
-            <div id="workshop-agenda" class="workshop-agenda"></div>
+
+            <div class="agenda-session">
+              <div class="agenda-session-heading">
+                <span>Session 1</span>
+                <h3>Platforms, Study Design &amp; Sample Collection</h3>
+              </div>
+
+              <div class="workshop-agenda">
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">09:00–09:10</div>
+                  <div><div class="workshop-agenda-title">Welcome &amp; Overview</div><div class="workshop-agenda-meta">Workshop aims, ANPC introduction and facilitator overview.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">09:10–09:35</div>
+                  <div><div class="workshop-agenda-title">What Do These Platforms Actually Measure?</div><div class="workshop-agenda-meta">How NMR lipoprotein profiling and LC-MS lipidomics differ, complement each other and support different biological questions.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">09:35–10:00</div>
+                  <div><div class="workshop-agenda-title">Study Design Considerations</div><div class="workshop-agenda-meta">Matrix choice, fasting status, sample size, longitudinal versus cross-sectional designs and integrating lipid measurements into existing studies.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">10:00–10:25</div>
+                  <div><div class="workshop-agenda-title">Sample Collection &amp; Handling</div><div class="workshop-agenda-meta">Collection tubes, processing, pre-analytical effects, freeze-thaw cycles, long-term storage and biobanked samples.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">10:25–10:50</div>
+                  <div><div class="workshop-agenda-title">Running Large Human Studies</div><div class="workshop-agenda-meta">Batch planning, randomisation, sample tracking, working with core facilities, budgeting and realistic timelines.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">10:50–11:00</div>
+                  <div><div class="workshop-agenda-title">Discussion &amp; Open Questions</div><div class="workshop-agenda-meta">Questions and take-home points from Session 1.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="agenda-break">
+              <div class="workshop-agenda-time">11:00–11:30</div>
+              <div><strong>Lab Tour &amp; Morning Coffee</strong><span>Tour the ANPC NMR and LC-MS facilities, sample preparation areas and data infrastructure.</span></div>
+            </div>
+
+            <div class="agenda-session">
+              <div class="agenda-session-heading">
+                <span>Session 2</span>
+                <h3>Data Processing, Quality Assessment &amp; Biological Interpretation</h3>
+              </div>
+
+              <div class="workshop-agenda">
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">11:30–12:20</div>
+                  <div><div class="workshop-agenda-title">From Raw Output to Analysis-Ready Data</div><div class="workshop-agenda-meta">NMR processing and IVDR outputs; LC-MS peak detection and lipid annotation; pooled QC design, run-order effects, drift and correction.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">12:30–12:50</div>
+                  <div><div class="workshop-agenda-title">Common Pitfalls &amp; How to Catch Them</div><div class="workshop-agenda-meta">Batch effects, haemolysis, lipaemia, sample mix-ups, extraction failures and other red flags worth investigating.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">12:50–13:15</div>
+                  <div><div class="workshop-agenda-title">From Data to Biology</div><div class="workshop-agenda-meta">Interpreting lipoprotein subclasses and lipid classes, selecting biologically meaningful features, visualisation and reporting.</div></div>
+                </div>
+                <div class="workshop-agenda-item">
+                  <div class="workshop-agenda-time">13:15–13:30</div>
+                  <div><div class="workshop-agenda-title">Open Discussion &amp; Wrap-Up</div><div class="workshop-agenda-meta">Bring your own study questions, review key takeaways and explore ANPC services and further resources.</div></div>
+                </div>
+              </div>
+            </div>
           </section>
 
           <aside class="workshop-side-card">
@@ -316,9 +420,23 @@
           </aside>
         </div>
       </div>
+
+      <div id="facilitator-modal" class="facilitator-modal" aria-hidden="true">
+        <div class="facilitator-modal-backdrop" onclick="closeFacilitator()"></div>
+        <article class="facilitator-modal-card" role="dialog" aria-modal="true" aria-labelledby="facilitator-modal-name">
+          <button class="modal-close" onclick="closeFacilitator()" aria-label="Close facilitator bio">×</button>
+          <img id="facilitator-modal-photo" src="" alt="">
+          <div class="facilitator-modal-copy">
+            <span class="eyebrow">Workshop facilitator</span>
+            <h2 id="facilitator-modal-name"></h2>
+            <p id="facilitator-modal-role" class="facilitator-role"></p>
+            <p id="facilitator-modal-bio"></p>
+          </div>
+        </article>
+      </div>
     </section>
 
-    <section id="page-my-program" class="page">
+<section id="page-my-program" class="page">
       <div class="inner-page">
         <span class="eyebrow">Your conference</span>
         <h1>★ My Program</h1>
