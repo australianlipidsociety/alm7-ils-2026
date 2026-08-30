@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173F67">
+  <meta name="description" content="ALM7 & 5th iLS Conference — Perth, Western Australia, 18–21 October 2026">
+  <title>ALM7 & 5th iLS Conference</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <button class="brand-button" onclick="goHome()" aria-label="Return to home">
+        <img src="assets/conference-logo.png" alt="ALM7 & 5th iLS Conference">
+      </button>
+
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-page="home">Program</button>
+        <button class="nav-link" data-page="abstracts">Abstracts</button>
+        <button class="nav-link" data-page="speakers">Speakers</button>
+        <button class="nav-link" data-page="map">Map</button>
+        <button class="nav-link" data-page="my-program">★ My Program</button>
+      </nav>
+    </div>
+  </header>
+
+  <div id="data-status" class="data-status loading"><span class="status-dot"></span> Connecting to the live Google Sheet…</div>
+
+  <main id="app">
+    <!-- Home -->
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div class="hero-decoration hero-decoration-one"></div>
+        <div class="hero-decoration hero-decoration-two"></div>
+        <div class="hero-content">
+          <span class="eyebrow">ALM7 &amp; 5th iLS Conference</span>
+          <h1>Perth, Western Australia</h1>
+          <p class="hero-date">18–21 October 2026</p>
+          <button class="primary-button" onclick="showPage('program')">
+            <span>View Full Program</span><span>→</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-wrap">
+        <div class="search-box" onclick="showPage('search')">
+          <span class="search-icon">⌕</span>
+          <span>Search program, abstracts &amp; speakers</span>
+          <span class="search-arrow">→</span>
+        </div>
+
+        <div class="quick-grid">
+          <button class="quick-card" onclick="showPage('abstracts')">
+            <span class="quick-icon">▤</span>
+            <span class="quick-title">Abstracts</span>
+            <span class="quick-description">Browse presentations &amp; abstracts</span>
+          </button>
+          <button class="quick-card" onclick="showPage('map')">
+            <span class="quick-icon">⌖</span>
+            <span class="quick-title">Venue Map</span>
+            <span class="quick-description">Find rooms &amp; facilities</span>
+          </button>
+          <button class="quick-card quick-card-wide" onclick="showPage('my-program')">
+            <span class="quick-icon">★</span>
+            <span class="quick-title">My Program</span>
+            <span class="quick-description"><span id="favourite-count">0</span> saved sessions</span>
+          </button>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Live conference guide</span>
+            <h2>What's happening</h2>
+          </div>
+          <button class="text-button" onclick="showPage('program')">Full program →</button>
+        </div>
+
+        <div class="now-grid">
+          <article class="now-card now-card-live">
+            <div class="now-label"><span class="live-dot"></span> Happening now</div>
+            <div id="happening-now"></div>
+          </article>
+
+          <article class="now-card">
+            <div class="now-label">Up next</div>
+            <div id="up-next"></div>
+          </article>
+        </div>
+
+        <div class="today-section">
+          <div class="section-heading compact">
+            <div>
+              <span class="eyebrow">Today</span>
+              <h2 id="today-heading">Monday 19 October</h2>
+            </div>
+          </div>
+          <div id="today-program" class="timeline"></div>
+        </div>
+
+        <div id="announcement-area"></div>
+      </div>
+    </section>
+
+    <!-- Placeholder pages; these become our next build stages -->
+    <section id="page-program" class="page">
+      <div class="program-page">
+        <div class="program-header">
+          <div>
+            <span class="eyebrow">Conference timetable</span>
+            <h1>Full Program</h1>
+            <p class="page-intro">Everything happening at ALM7 &amp; 5th iLS — scientific sessions, keynotes, workshops, breaks, AGMs and social events.</p>
+          </div>
+          <button class="program-print-button" onclick="window.print()">Print / Save PDF</button>
+        </div>
+
+        <div class="day-tabs" role="tablist" aria-label="Conference days">
+          <button class="day-tab active" data-date="2026-10-18">Sun <strong>18</strong></button>
+          <button class="day-tab" data-date="2026-10-19">Mon <strong>19</strong></button>
+          <button class="day-tab" data-date="2026-10-20">Tue <strong>20</strong></button>
+          <button class="day-tab" data-date="2026-10-21">Wed <strong>21</strong></button>
+        </div>
+
+        <div class="program-tools">
+          <div class="program-search">
+            <span>⌕</span>
+            <input id="program-search" type="search" placeholder="Search this day's program..." autocomplete="off">
+          </div>
+          <div id="program-filters" class="filter-row" aria-label="Filter program"></div>
+        </div>
+
+        <div class="program-summary">
+          <span id="program-summary-text"></span>
+          <button id="clear-program-filters" class="clear-filters">Clear filters</button>
+        </div>
+
+        <div id="program-list" class="program-list"></div>
+      </div>
+    </section>
+
+    <section id="page-search" class="page">
+      <div class="inner-page">
+        <span class="eyebrow">Find anything</span>
+        <h1>Search</h1>
+        <div class="search-box search-box-large">
+          <span class="search-icon">⌕</span>
+          <input id="global-search" type="search" placeholder="Search program, abstracts & speakers..." autocomplete="off">
+        </div>
+        <div id="search-results" class="placeholder-panel">Start typing to search.</div>
+      </div>
+    </section>
+
+    <section id="page-abstracts" class="page">
+      <div class="inner-page">
+        <span class="eyebrow">Scientific program</span>
+        <h1>Abstracts</h1>
+        <p class="page-intro">Searchable abstracts and presentations will live here.</p>
+        <div class="placeholder-panel">Abstract browser coming next.</div>
+      </div>
+    </section>
+
+    <section id="page-speakers" class="page">
+      <div class="inner-page">
+        <span class="eyebrow">Meet the experts</span>
+        <h1>Speakers</h1>
+        <p class="page-intro">Speaker profiles and their conference presentations will live here.</p>
+        <div class="placeholder-panel">Speaker directory coming later.</div>
+      </div>
+    </section>
+
+    <section id="page-map" class="page">
+      <div class="inner-page">
+        <span class="eyebrow">Getting around</span>
+        <h1>Venue Map</h1>
+        <p class="page-intro">We'll add the venue map here, with room information and clickable locations.</p>
+        <div class="placeholder-panel map-placeholder">⌖<br><span>Interactive venue map coming next.</span></div>
+      </div>
+    </section>
+
+    <section id="page-my-program" class="page">
+      <div class="inner-page">
+        <span class="eyebrow">Your conference</span>
+        <h1>★ My Program</h1>
+        <p class="page-intro">Your saved sessions will appear here. Favourites are stored on the device, so no account is required.</p>
+        <div id="my-program-list" class="placeholder-panel">You haven't saved any sessions yet.</div>
+      </div>
+    </section>
+  </main>
+
+
+  <div id="session-modal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" onclick="closeSessionModal()"></div>
+    <section class="session-modal-card" role="dialog" aria-modal="true" aria-labelledby="session-modal-title">
+      <button class="modal-close" onclick="closeSessionModal()" aria-label="Close">×</button>
+      <div id="session-modal-content"></div>
+    </section>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button data-page="program"><span>▦</span><small>Program</small></button>
+    <button data-page="search"><span>⌕</span><small>Search</small></button>
+    <button data-page="map"><span>⌖</span><small>Map</small></button>
+    <button data-page="my-program"><span>★</span><small>My Program</small></button>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
