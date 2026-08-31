@@ -285,17 +285,6 @@ async function loadConferenceData() {
     const results = await Promise.all(entries.map(([name, range]) => loadSheet(name, range)));
     const raw = Object.fromEntries(entries.map(([name], i) => [name, results[i]]));
 
-    const optionalEntries = Object.entries(CONFIG.optionalSheets || {});
-    const optionalResults = await Promise.all(optionalEntries.map(async ([name, range]) => {
-      try {
-        return [name, await loadSheet(name, range)];
-      } catch (error) {
-        console.info(`Optional sheet ${name} is not available yet.`);
-        return [name, []];
-      }
-    }));
-    optionalResults.forEach(([name, rows]) => { raw[name] = rows; });
-
     buildDatabase(raw);
     applySettings();
     initialiseProgramDay();
@@ -841,7 +830,8 @@ function renderSponsors() {
   const sponsors = DB.sponsors
     .filter(s => {
       const status = String(s.Status || "Published").trim().toLowerCase();
-      return (status === "" || status === "published") && String(s.Name || "").trim();
+      const visible = ["", "published", "active", "yes", "live"].includes(status);
+      return visible && String(s.Name || "").trim();
     })
     .sort((a,b) => {
       const ta = SPONSOR_TIER_ORDER.indexOf(sponsorTier(a.Tier));
@@ -938,6 +928,8 @@ function renderAll() {
   renderHome();
   renderProgram();
   renderMyProgram();
+  renderAbstracts();
+  renderSpeakers();
   renderSponsors();
 }
 
@@ -1023,6 +1015,25 @@ loadConferenceData();
 document.querySelector("#abstract-search")?.addEventListener("input", renderAbstracts);
 document.querySelector("#abstract-topic-filter")?.addEventListener("change", renderAbstracts);
 document.querySelector("#speaker-search")?.addEventListener("input", renderSpeakers);
+
+document.addEventListener("click", event => {
+  const sponsorAbstractButton = event.target.closest("[data-sponsor-abstract]");
+  if (sponsorAbstractButton) {
+    event.preventDefault();
+    openSponsorAbstract(sponsorAbstractButton.dataset.sponsorAbstract);
+    return;
+  }
+
+  if (event.target.closest("[data-close-sponsor-modal]")) {
+    event.preventDefault();
+    closeSponsorAbstract();
+    return;
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeSponsorAbstract();
+});
 
 document.addEventListener("click", event => {
   const abstractButton = event.target.closest("[data-open-abstract]");
