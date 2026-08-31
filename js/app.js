@@ -11,6 +11,7 @@ const DB = {
   venues: [],
   announcements: [],
   sponsors: [],
+  sponsorLoadError: "",
   settings: {},
   loaded: false
 };
@@ -203,6 +204,90 @@ function loadSheet(sheetName, range) {
   });
 }
 
+
+/*
+ * SPONSORS can be pasted directly from SPONSORS_TEMPLATE.csv, so its header
+ * row may be at row 1 rather than row 4 like the original workbook tabs.
+ * Read the whole A:O area and locate the header row by column names.
+ */
+function loadSponsorsSheet() {
+  return new Promise((resolve, reject) => {
+    const sheetName = "SPONSORS";
+    const callbackName = `__sheet_SPONSORS_${Date.now()}_${Math.floor(Math.random()*10000)}`;
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("SPONSORS timed out"));
+    }, 15000);
+
+    const script = document.createElement("script");
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      script.remove();
+    }
+
+    window[callbackName] = response => {
+      try {
+        if (!response || response.status === "error" || !response.table) {
+          throw new Error(response?.errors?.[0]?.detailed_message || "Could not read SPONSORS");
+        }
+
+        const rawRows = response.table.rows.map(row =>
+          Array.from({length: 15}, (_, i) => {
+            const cell = row.c?.[i];
+            if (!cell) return "";
+            if (cell.f !== undefined && cell.f !== null) return cell.f;
+            return cell.v ?? "";
+          })
+        );
+
+        const headerIndex = rawRows.findIndex(row => {
+          const normalised = row.map(v => String(v || "").trim().toLowerCase());
+          return normalised.includes("sponsorid") &&
+                 normalised.includes("name") &&
+                 normalised.includes("tier");
+        });
+
+        if (headerIndex < 0) {
+          throw new Error("SPONSORS header row not found. Expected SponsorID, Name and Tier.");
+        }
+
+        const headers = rawRows[headerIndex].map(v => String(v || "").trim());
+        const rows = rawRows.slice(headerIndex + 1)
+          .filter(row => row.some(v => String(v || "").trim() !== ""))
+          .map(row => {
+            const obj = {};
+            headers.forEach((header, i) => {
+              if (header) obj[header] = row[i] ?? "";
+            });
+            return obj;
+          });
+
+        cleanup();
+        resolve(rows);
+      } catch (err) {
+        cleanup();
+        reject(err);
+      }
+    };
+
+    const params = new URLSearchParams({
+      sheet: sheetName,
+      range: "A1:O",
+      headers: "0",
+      tqx: `out:json;responseHandler:${callbackName}`
+    });
+
+    script.src = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?${params.toString()}`;
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Could not connect to SPONSORS"));
+    };
+    document.head.appendChild(script);
+  });
+}
+
 function published(row) {
   const status = String(row.Status || "Published").trim().toLowerCase();
   return !status || status === "published";
@@ -284,6 +369,18 @@ async function loadConferenceData() {
     const entries = Object.entries(CONFIG.sheets);
     const results = await Promise.all(entries.map(([name, range]) => loadSheet(name, range)));
     const raw = Object.fromEntries(entries.map(([name], i) => [name, results[i]]));
+
+    // Sponsor sheet uses automatic header detection so it works whether the
+    // SPONSORS template was pasted starting at row 1 or placed lower down.
+    DB.sponsorLoadError = "";
+    try {
+      raw.SPONSORS = await loadSponsorsSheet();
+      console.info(`Loaded ${raw.SPONSORS.length} sponsor row(s).`);
+    } catch (sponsorError) {
+      console.error("SPONSORS load error:", sponsorError);
+      raw.SPONSORS = [];
+      DB.sponsorLoadError = sponsorError.message || "Please check the SPONSORS tab headings.";
+    }
 
     buildDatabase(raw);
     applySettings();
@@ -826,6 +923,14 @@ function getSponsorScience(sponsor) {
 function renderSponsors() {
   const holder = document.querySelector("#sponsors-content");
   if (!holder) return;
+
+  if (DB.sponsorLoadError) {
+    holder.innerHTML = `<div class="sponsor-empty">
+      <strong>Unable to read the SPONSORS sheet</strong>
+      ${escapeHTML(DB.sponsorLoadError)}
+    </div>`;
+    return;
+  }
 
   const sponsors = DB.sponsors
     .filter(s => {
