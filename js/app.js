@@ -210,82 +210,36 @@ function loadSheet(sheetName, range) {
  * row may be at row 1 rather than row 4 like the original workbook tabs.
  * Read the whole A:O area and locate the header row by column names.
  */
-function loadSponsorsSheet() {
-  return new Promise((resolve, reject) => {
-    const sheetName = "SPONSORS";
-    const callbackName = `__sheet_SPONSORS_${Date.now()}_${Math.floor(Math.random()*10000)}`;
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error("SPONSORS timed out"));
-    }, 15000);
+function sponsorRowsLookValid(rows) {
+  return Array.isArray(rows) && rows.some(row =>
+    Object.prototype.hasOwnProperty.call(row, "Name") &&
+    Object.prototype.hasOwnProperty.call(row, "Tier")
+  );
+}
 
-    const script = document.createElement("script");
+/*
+ * Load SPONSORS using the same Google Visualization loader that already
+ * powers the rest of the conference app. The sponsor template has headers
+ * on row 1, but this also falls back to row 4 in case it was inserted using
+ * the original workbook layout.
+ */
+async function loadSponsorsSheet() {
+  const attempts = ["A1:O", "A4:O"];
+  let lastError = null;
 
-    function cleanup() {
-      clearTimeout(timeout);
-      delete window[callbackName];
-      script.remove();
-    }
-
-    window[callbackName] = response => {
-      try {
-        if (!response || response.status === "error" || !response.table) {
-          throw new Error(response?.errors?.[0]?.detailed_message || "Could not read SPONSORS");
-        }
-
-        const rawRows = response.table.rows.map(row =>
-          Array.from({length: 15}, (_, i) => {
-            const cell = row.c?.[i];
-            if (!cell) return "";
-            if (cell.f !== undefined && cell.f !== null) return cell.f;
-            return cell.v ?? "";
-          })
-        );
-
-        const headerIndex = rawRows.findIndex(row => {
-          const normalised = row.map(v => String(v || "").trim().toLowerCase());
-          return normalised.includes("sponsorid") &&
-                 normalised.includes("name") &&
-                 normalised.includes("tier");
-        });
-
-        if (headerIndex < 0) {
-          throw new Error("SPONSORS header row not found. Expected SponsorID, Name and Tier.");
-        }
-
-        const headers = rawRows[headerIndex].map(v => String(v || "").trim());
-        const rows = rawRows.slice(headerIndex + 1)
-          .filter(row => row.some(v => String(v || "").trim() !== ""))
-          .map(row => {
-            const obj = {};
-            headers.forEach((header, i) => {
-              if (header) obj[header] = row[i] ?? "";
-            });
-            return obj;
-          });
-
-        cleanup();
-        resolve(rows);
-      } catch (err) {
-        cleanup();
-        reject(err);
+  for (const range of attempts) {
+    try {
+      const rows = await loadSheet("SPONSORS", range);
+      if (sponsorRowsLookValid(rows)) {
+        return rows;
       }
-    };
+      lastError = new Error(`SPONSORS was readable at ${range}, but Name/Tier headings were not detected.`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
 
-    const params = new URLSearchParams({
-      sheet: sheetName,
-      range: "A1:O",
-      headers: "0",
-      tqx: `out:json;responseHandler:${callbackName}`
-    });
-
-    script.src = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?${params.toString()}`;
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("Could not connect to SPONSORS"));
-    };
-    document.head.appendChild(script);
-  });
+  throw lastError || new Error("Could not read the SPONSORS sheet.");
 }
 
 function published(row) {
@@ -934,9 +888,9 @@ function renderSponsors() {
 
   const sponsors = DB.sponsors
     .filter(s => {
-      const status = String(s.Status || "Published").trim().toLowerCase();
-      const visible = ["", "published", "active", "yes", "live"].includes(status);
-      return visible && String(s.Name || "").trim();
+      const status = String(s.Status || "").trim().toLowerCase();
+      const hiddenStatuses = ["hidden", "hide", "disabled", "inactive", "no"];
+      return !hiddenStatuses.includes(status) && String(s.Name || "").trim();
     })
     .sort((a,b) => {
       const ta = SPONSOR_TIER_ORDER.indexOf(sponsorTier(a.Tier));
@@ -947,7 +901,10 @@ function renderSponsors() {
     });
 
   if (!sponsors.length) {
-    holder.innerHTML = `<div class="sponsor-empty"><strong>Sponsor showcase coming soon</strong>Logo, tier, website and scientific contribution details will appear here as sponsor information is added.</div>`;
+    holder.innerHTML = `<div class="sponsor-empty">
+      <strong>No sponsor rows were found</strong>
+      The SPONSORS tab was reached successfully, but no rows with a value in the Name column were returned.
+    </div>`;
     return;
   }
 
