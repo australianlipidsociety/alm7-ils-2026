@@ -632,6 +632,135 @@ function getAbstractPresentation(abstractId) {
   return DB.presentations.find(p => p.AbstractID === abstractId) || null;
 }
 
+
+function normaliseAuthorName(value) {
+  return String(value || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\b(prof(?:essor)?|dr|mr|mrs|ms|miss)\.?\b/gi, " ")
+    .replace(/[^\p{L}\p{N}\s'-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function getPresentingAuthor(abs, presentation) {
+  // The dedicated ABSTRACTS.PresentingAuthor column is authoritative.
+  // Older linked-speaker logic remains only as a fallback for incomplete rows.
+  const explicit = String(abs.PresentingAuthor || abs["Presenting Author"] || "").trim();
+  if (explicit) return explicit;
+
+  const speaker = presentation?.SpeakerID
+    ? DB.speakers.find(s => String(s.SpeakerID) === String(presentation.SpeakerID))
+    : null;
+
+  return String(
+    presentation?.SpeakerDisplay ||
+    speaker?.DisplayName ||
+    ""
+  ).trim();
+}
+
+function parseAuthorEntry(entry) {
+  const raw = String(entry || "").trim();
+  if (!raw) return { name: "", affiliations: [] };
+
+  // Supported examples:
+  // Jane Smith^1
+  // Jane Smith^1,2
+  // Jane Smith [1,2]
+  // Jane Smith (1,2)
+  const match = raw.match(/^(.*?)(?:\s*\^|\s*\[|\s*\()(\d+(?:\s*,\s*\d+)*)[\]\)]?\s*$/);
+  if (!match) return { name: raw, affiliations: [] };
+
+  return {
+    name: match[1].trim(),
+    affiliations: match[2].split(",").map(n => n.trim()).filter(Boolean)
+  };
+}
+
+function splitAuthorEntries(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return [];
+
+  // Semicolons are preferred because commas can also separate affiliation numbers.
+  if (text.includes(";")) {
+    return text.split(";").map(v => v.trim()).filter(Boolean);
+  }
+
+  // Preserve legacy comma-separated author lists if no superscript markers are used.
+  if (!/[\^\[\(]\s*\d/.test(text)) {
+    return text.split(/,\s*(?=[A-ZÀ-ÖØ-Þ])/u).map(v => v.trim()).filter(Boolean);
+  }
+
+  return [text];
+}
+
+function parseAffiliations(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return [];
+
+  return text
+    .split(/;\s*|\n+/)
+    .map(v => v.trim())
+    .filter(Boolean)
+    .map((entry, index) => {
+      // Supported examples:
+      // 1^Murdoch University
+      // 1 Murdoch University
+      // [1] Murdoch University
+      // 1: Murdoch University
+      let match = entry.match(/^\s*\[?(\d+)\]?\s*(?:\^|[:.\-])?\s*(.+)$/);
+      if (match) {
+        return { number: match[1], text: match[2].trim() };
+      }
+      return { number: String(index + 1), text: entry };
+    });
+}
+
+function formatAffiliationSuperscripts(numbers) {
+  if (!numbers?.length) return "";
+  return `<sup class="author-affiliation-sup">${numbers.map(escapeHTML).join(",")}</sup>`;
+}
+
+function formatAbstractAuthors(abs, presentation) {
+  const raw = String(abs.Authors || "").trim();
+  const presenter = getPresentingAuthor(abs, presentation);
+  if (!raw) return { html: "", presenter, matched: false };
+
+  const presenterNorm = normaliseAuthorName(presenter);
+  let matched = false;
+
+  const entries = splitAuthorEntries(raw);
+  const rendered = entries.map(entry => {
+    const parsed = parseAuthorEntry(entry);
+    const isPresenter = presenterNorm &&
+      normaliseAuthorName(parsed.name) === presenterNorm;
+
+    if (isPresenter) matched = true;
+
+    const nameHTML = isPresenter
+      ? `<span class="presenting-author" title="Presenting author">${escapeHTML(parsed.name)}</span>`
+      : escapeHTML(parsed.name);
+
+    return `${nameHTML}${formatAffiliationSuperscripts(parsed.affiliations)}`;
+  });
+
+  return {
+    html: rendered.join("; "),
+    presenter,
+    matched
+  };
+}
+
+function formatAbstractAffiliations(abs) {
+  const affiliations = parseAffiliations(abs.Affiliations);
+  if (!affiliations.length) return "";
+
+  return affiliations.map(item =>
+    `<div class="abstract-affiliation-line"><sup>${escapeHTML(item.number)}</sup>${escapeHTML(item.text)}</div>`
+  ).join("");
+}
+
 function renderAbstracts() {
   const list = document.querySelector("#abstract-list");
   const count = document.querySelector("#abstract-count");
@@ -655,7 +784,7 @@ function renderAbstracts() {
       if (!query) return true;
       const haystack = [
         a.Title, a.Authors, a.Affiliations, a.AbstractText, a.Keywords,
-        a.Topic, a.CorrespondingAuthor, a.SubmissionNumber
+        a.Topic, a.CorrespondingAuthor, a.PresentingAuthor, a.SubmissionNumber
       ].join(" ").toLowerCase();
       return haystack.includes(query);
     })
@@ -683,8 +812,15 @@ function renderAbstracts() {
           ${topic ? `<span class="abstract-badge topic">${escapeHTML(topic)}</span>` : ""}
         </div>
         <h3>${escapeHTML(abs.Title || presentation?.Title || "Untitled abstract")}</h3>
-        ${abs.Authors ? `<div class="abstract-authors">${escapeHTML(abs.Authors)}</div>` : ""}
-        ${abs.Affiliations ? `<div class="abstract-affiliations">${escapeHTML(abs.Affiliations)}</div>` : ""}
+        ${(() => {
+          const authorInfo = formatAbstractAuthors(abs, presentation);
+          if (!authorInfo.html) return "";
+          return `<div class="abstract-authors">${authorInfo.html}</div>` +
+            (!authorInfo.matched && authorInfo.presenter
+              ? `<div class="presenting-author-fallback">Presenting author: <span class="presenting-author">${escapeHTML(authorInfo.presenter)}</span></div>`
+              : "");
+        })()}
+        ${abs.Affiliations ? `<div class="abstract-affiliations">${formatAbstractAffiliations(abs)}</div>` : ""}
         ${sessionTitle ? `<div class="abstract-affiliations"><strong>Session:</strong> ${escapeHTML(sessionTitle)}</div>` : ""}
         ${shortPreview ? `<div class="abstract-preview">${escapeHTML(shortPreview)}</div>` : ""}
         ${abs.Keywords ? `<div class="abstract-keywords"><strong>Keywords:</strong> ${escapeHTML(abs.Keywords)}</div>` : ""}
@@ -715,8 +851,15 @@ function openAbstract(abstractId) {
   content.innerHTML = `
     <span class="eyebrow">${escapeHTML(presentation?.PresentationType || abs.Topic || "Conference abstract")}</span>
     <h2 id="abstract-modal-title">${escapeHTML(abs.Title || presentation?.Title || "Untitled abstract")}</h2>
-    ${abs.Authors ? `<div class="abstract-modal-authors">${escapeHTML(abs.Authors)}</div>` : ""}
-    ${abs.Affiliations ? `<div class="abstract-modal-affiliations">${escapeHTML(abs.Affiliations)}</div>` : ""}
+    ${(() => {
+      const authorInfo = formatAbstractAuthors(abs, presentation);
+      if (!authorInfo.html) return "";
+      return `<div class="abstract-modal-authors">${authorInfo.html}</div>` +
+        (!authorInfo.matched && authorInfo.presenter
+          ? `<div class="presenting-author-fallback">Presenting author: <span class="presenting-author">${escapeHTML(authorInfo.presenter)}</span></div>`
+          : "");
+    })()}
+    ${abs.Affiliations ? `<div class="abstract-modal-affiliations">${formatAbstractAffiliations(abs)}</div>` : ""}
     ${session?.SessionTitle ? `<div class="abstract-modal-meta"><strong>Session:</strong> ${escapeHTML(session.SessionTitle)}</div>` : ""}
     ${scheduleBits.length ? `<div class="abstract-modal-meta">${escapeHTML(scheduleBits.join(" • "))}</div>` : ""}
     ${abs.AbstractText ? `<div class="abstract-modal-body">${escapeHTML(abs.AbstractText)}</div>` : `<div class="abstract-modal-body">Abstract text is not yet available.</div>`}
@@ -985,6 +1128,33 @@ function closeSponsorAbstract() {
   document.body.style.overflow = "";
 }
 
+
+function renderPresenterInfo() {
+  const deadlineEl = document.getElementById("oral-upload-deadline");
+  const uploadLink = document.getElementById("oral-upload-link");
+  if (!deadlineEl || !uploadLink) return;
+
+  const deadline = String(DB.settings.OralUploadDeadline || "").trim();
+  const url = String(DB.settings.OralUploadURL || "").trim();
+
+  deadlineEl.innerHTML = `Upload deadline: <strong>${escapeHTML(deadline || "to be confirmed")}</strong>.`;
+
+  if (url) {
+    uploadLink.href = url;
+    uploadLink.target = "_blank";
+    uploadLink.rel = "noopener";
+    uploadLink.classList.remove("disabled");
+    uploadLink.removeAttribute("aria-disabled");
+    uploadLink.textContent = "Upload oral presentation →";
+  } else {
+    uploadLink.href = "#";
+    uploadLink.removeAttribute("target");
+    uploadLink.classList.add("disabled");
+    uploadLink.setAttribute("aria-disabled", "true");
+    uploadLink.textContent = "Upload presentation — link coming soon";
+  }
+}
+
 function renderAll() {
   updateFavouriteCount();
   renderHome();
@@ -993,6 +1163,7 @@ function renderAll() {
   renderAbstracts();
   renderSpeakers();
   renderSponsors();
+  renderPresenterInfo();
 }
 
 

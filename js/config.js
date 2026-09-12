@@ -7,7 +7,7 @@ window.CONFERENCE_CONFIG = {
     PROGRAM: "A4:O",
     SESSIONS: "A4:K",
     PRESENTATIONS: "A4:N",
-    ABSTRACTS: "A4:L",
+    ABSTRACTS: "A4:M",
     SPEAKERS: "A4:J",
     VENUES: "A4:J",
     ANNOUNCEMENTS: "A4:I",
