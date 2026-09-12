@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#173F67">
   <meta name="description" content="ALM7 & 5th iLS Conference — Perth, Western Australia, 18–21 October 2026">
   <title>ALM7 & 5th iLS Conference</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260912-1">
 </head>
 <body>
   <header class="site-header">
@@ -22,6 +22,7 @@
         <button class="nav-link" data-page="workshop">Workshop</button>
         <button class="nav-link" data-page="map">Venue</button>
         <button class="nav-link" data-page="sponsors">Sponsors</button>
+        <button class="nav-link" data-page="presenter-info">Presenter Info</button>
         <button class="nav-link" data-page="perth">Explore Perth</button>
         <button class="nav-link" data-page="my-program">★ My Program</button>
       </nav>
@@ -40,6 +41,7 @@
       <button data-page="workshop"><span>▥</span><span>Workshop</span></button>
       <button data-page="map"><span>⌖</span><span>Venue</span></button>
       <button data-page="sponsors"><span>◇</span><span>Sponsors</span></button>
+      <button data-page="presenter-info"><span>▣</span><span>Presenter Info</span></button>
       <button data-page="perth"><span>☀</span><span>Explore Perth</span></button>
       <button data-page="my-program"><span>★</span><span>My Program</span></button>
     </nav>
@@ -191,7 +193,7 @@
 
         <div class="directory-summary">
           <strong id="abstract-count">0 abstracts</strong>
-          <span>Updates automatically from the conference Google Sheet.</span>
+          <span>Updates automatically from the conference Google Sheet. Presenting authors are underlined.</span>
         </div>
 
         <div id="abstract-list" class="abstract-list">
@@ -335,7 +337,74 @@
       </div>
     </section>
 
-    <section id="page-perth" class="page">
+        <section id="page-presenter-info" class="page">
+      <div class="presenter-info-page">
+        <header class="presenter-info-hero">
+          <span class="eyebrow">Information for presenters</span>
+          <h1>Presentation Guidelines</h1>
+          <p id="presenter-intro">Key information for oral and poster presenters at ALM7 &amp; the 5th iLS Conference.</p>
+        </header>
+
+        <div class="presenter-info-grid">
+          <article class="presenter-info-card oral-card">
+            <div class="presenter-info-card-head">
+              <span class="presenter-info-icon">▰</span>
+              <div>
+                <span class="eyebrow">Oral presenters</span>
+                <h2>Oral Presentations</h2>
+              </div>
+            </div>
+
+            <div class="presenter-spec">
+              <strong id="oral-format-short">16:9</strong>
+              <span id="oral-format-label">Widescreen slide format</span>
+            </div>
+
+            <ul class="presenter-checklist">
+              <li id="oral-format-text">Prepare your presentation in <strong>widescreen 16:9 format</strong>.</li>
+              <li id="oral-instructions">Please upload your final presentation before the conference using the link below.</li>
+              <li id="oral-upload-deadline">Upload deadline: <strong>to be confirmed</strong>.</li>
+            </ul>
+
+            <a id="oral-upload-link" class="presenter-action disabled" href="#" aria-disabled="true">
+              Upload presentation — link coming soon
+            </a>
+          </article>
+
+          <article class="presenter-info-card poster-card">
+            <div class="presenter-info-card-head">
+              <span class="presenter-info-icon">▯</span>
+              <div>
+                <span class="eyebrow">Poster presenters</span>
+                <h2>Poster Presentations</h2>
+              </div>
+            </div>
+
+            <div class="presenter-spec">
+              <strong id="poster-size-short">A0</strong>
+              <span id="poster-orientation">Portrait orientation</span>
+            </div>
+
+            <ul class="presenter-checklist">
+              <li id="poster-size-text">Prepare your poster at <strong>A0 size in portrait orientation</strong>.</li>
+              <li id="poster-setup-time">Posters can be hung from <strong>3:00 PM on Sunday 18 October</strong>.</li>
+              <li id="poster-supplies">Pin tacks will be available from the <strong>registration desk</strong> if needed.</li>
+              <li id="poster-location">Poster presentations and sponsor displays are located in the <strong>Silver Room</strong>.</li>
+            </ul>
+          </article>
+        </div>
+
+        <aside class="presenter-help-card" id="presenter-help-card">
+          <div>
+            <span class="eyebrow">Need help?</span>
+            <h3>Questions about your presentation?</h3>
+            <p id="presenter-contact">Additional presenter instructions and upload details can be added here as they are confirmed.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+<section id="page-perth" class="page">
       <div class="perth-guide-page">
         <header class="perth-guide-header">
           <span class="eyebrow">Make the most of your stay</span>
@@ -360,7 +429,7 @@
           <div class="destination-grid">
             <a class="destination-card" href="https://www.perthculturalcentre.com.au/" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/WA_Museum_Boola_Bardip.jpg?width=1000" alt="Preview of the Perth Cultural Centre website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://www.perthculturalcentre.com.au/media/11275/capture.png?anchor=center&height=1080&mode=crop&rnd=133813280630000000&width=1920" alt="Preview of the Perth Cultural Centre website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -372,7 +441,7 @@
 
             <a class="destination-card" href="https://www.perthmint.com/" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://www.perthmint.com/globalassets/assets/images/heroes/1440px_i4r3762.jpg?hash=637406520460000000&height=600&mode=crop&width=1920" alt="Preview of The Perth Mint website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://www.perthmint.com/globalassets/assets/images/heroes/1440px_i4r3762.jpg?hash=637406520460000000&height=600&mode=crop&width=1920" alt="Preview of The Perth Mint website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -384,7 +453,7 @@
 
             <a class="destination-card" href="https://www.bgpa.wa.gov.au/kings-park" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Perth_skyline_from_Kings_Park.jpg?width=1000" alt="Preview of the Kings Park website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Perth_skyline_from_Kings_Park.jpg?width=1000" alt="Preview of the Kings Park website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -396,7 +465,7 @@
 
             <a class="destination-card" href="https://visitperth.com/see-and-do/public-spaces/venues/elizabeth-quay" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://developmentwa.com.au/images/speasyimagegallery/albums/36/images/dji-20241112121405-0028-d.jpg" alt="Preview of the Elizabeth Quay visitor website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://developmentwa.com.au/images/speasyimagegallery/albums/36/images/dji-20241112121405-0028-d.jpg" alt="Preview of the Elizabeth Quay visitor website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -417,7 +486,7 @@
           <div class="destination-grid">
             <a class="destination-card" href="https://www.westernaustralia.com/au/places-to-visit/perth-and-surrounds/perth-beaches" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://media.holafly.com/sites/1/2026/03/Cottesloe-Beach-1536x1024.jpg" alt="Preview of the Tourism Western Australia Perth beaches guide" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://media.holafly.com/sites/1/2026/03/Cottesloe-Beach-1536x1024.jpg" alt="Preview of the Tourism Western Australia Perth beaches guide" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -429,7 +498,7 @@
 
             <a class="destination-card" href="https://www.hillarysboardwalk.com.au/" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://www.transport.wa.gov.au/getmedia/1dcb0875-7a91-4396-a6b9-536ecfc54442/Hillarys-boat-harbour.jpg" alt="Preview of the Hillarys Boardwalk website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://cdn.prod.website-files.com/63e9a343be8e5ce1efe9ff14/63f57efc23250520d51df8f9_boardwalk_and_breakwater_1800px.jpg" alt="Preview of the Hillarys Boardwalk website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -441,7 +510,7 @@
 
             <a class="destination-card" href="https://www.rottnestisland.com/" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://cloudfront-ap-southeast-2.images.arcpublishing.com/nzme/XJJTERWTNRF7BGKFXAQ53QLHTY.jpg" alt="Preview of the Rottnest Island website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://cloudfront-ap-southeast-2.images.arcpublishing.com/nzme/XJJTERWTNRF7BGKFXAQ53QLHTY.jpg" alt="Preview of the Rottnest Island website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -453,7 +522,7 @@
 
             <a class="destination-card" href="https://www.swanvalley.com.au/" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://cdn-ak.f.st-hatena.com/images/fotolife/d/dantra/20231218/20231218142356.jpg" alt="Preview of the Swan Valley website" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://cdn-ak.f.st-hatena.com/images/fotolife/d/dantra/20231218/20231218142356.jpg" alt="Preview of the Swan Valley website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -465,7 +534,7 @@
 
             <a class="destination-card" href="https://www.westernaustralia.com/au/itinerary/a-day-in-fremantle/5a152e5a2ae3b49e65e7795c" target="_blank" rel="noopener">
               <div class="destination-image">
-                <img src="https://i0.wp.com/thewanderbug.com/wp-content/uploads/2019/11/Fremantle-Western-Australia_25.jpg?resize=1000%2C665" alt="Preview of the Tourism Western Australia Fremantle guide" loading="lazy" referrerpolicy="no-referrer">
+                <img src="https://i0.wp.com/thewanderbug.com/wp-content/uploads/2019/11/Fremantle-Western-Australia_25.jpg?resize=1000%2C665" alt="Preview of the Tourism Western Australia Fremantle guide" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                 <span>Explore</span>
               </div>
               <div class="destination-copy">
@@ -478,15 +547,15 @@
             <article class="destination-card destination-card-further">
               <div class="destination-collage">
                 <a href="https://visitmandurah.com/" target="_blank" rel="noopener" aria-label="Visit Mandurah">
-                  <img src="https://images.squarespace-cdn.com/content/v1/57ca845dff7c508975ca4f8b/1517893067028-APTVY0AJXW3IKQB0JYQW/image-asset.jpeg" alt="Preview of the Visit Mandurah website" loading="lazy" referrerpolicy="no-referrer">
+                  <img src="https://images.squarespace-cdn.com/content/v1/57ca845dff7c508975ca4f8b/1517893067028-APTVY0AJXW3IKQB0JYQW/image-asset.jpeg" alt="Preview of the Visit Mandurah website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                   <span>Mandurah</span>
                 </a>
                 <a href="https://rockingham.wa.gov.au/events,-culture-and-tourism/rediscover-rockingham/tourist-attractions" target="_blank" rel="noopener" aria-label="Visit Rockingham">
-                  <img src="https://images.trvl-media.com/lodging/11000000/10450000/10440100/10440089/13a9889b.jpg?impolicy=resizecrop&ra=fill&rh=700&rw=1000" alt="Preview of the City of Rockingham visitor website" loading="lazy" referrerpolicy="no-referrer">
+                  <img src="https://images.trvl-media.com/lodging/11000000/10450000/10440100/10440089/13a9889b.jpg?impolicy=resizecrop&ra=fill&rh=700&rw=1000" alt="Preview of the City of Rockingham visitor website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                   <span>Rockingham</span>
                 </a>
                 <a href="https://experienceperthhills.com.au/" target="_blank" rel="noopener" aria-label="Visit Perth Hills">
-                  <img src="https://thetouraustralia.com.au/wp-content/uploads/2023/10/Lesmurdie-Falls-National-Park-best-place-to-visit-in-Perth.jpg" alt="Preview of the Experience Perth Hills website" loading="lazy" referrerpolicy="no-referrer">
+                  <img src="https://experienceperthhills.com.au/wp-content/uploads/2023/10/Nicole-Connolly-Lesmurdie-Falls.webp" alt="Preview of the Experience Perth Hills website" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.parentElement.classList.add('destination-image-fallback')">
                   <span>Perth Hills</span>
                 </a>
               </div>
@@ -717,8 +786,8 @@
       <div id="session-modal-content"></div>
     </section>
   </div>
-<script src="js/config.js"></script>
-  <script src="js/workshop.js"></script>
-  <script src="js/app.js"></script>
+<script src="js/config.js?v=20260912-1"></script>
+  <script src="js/workshop.js?v=20260912-1"></script>
+  <script src="js/app.js?v=20260912-1"></script>
 </body>
 </html>
