@@ -633,8 +633,27 @@ function speakerTypeClass(type) {
   return "oral";
 }
 
+function localSpeakerPhoto(speaker) {
+  const name = String(speaker.DisplayName || "").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[–—]/g, "-");
+  const localPhotos = [
+    [/filipovska/, "assets/speakers/aleksandra-filipovska.png"],
+    [/watts/, "assets/speakers/gerald-watts.png"],
+    [/hiroshi/, "assets/speakers/hiroshi.png"],
+    [/shane.*ellis|ellis.*shane/, "assets/speakers/shane-ellis.jpg"],
+    [/choi/, "assets/speakers/hw-choi.png"],
+    [/laura/, "assets/speakers/laura.jpg"],
+    [/kerry[- ]?anne.*rye|rye.*kerry[- ]?anne/, "assets/speakers/kerry-anne-rye.jpg"]
+  ];
+  const match = localPhotos.find(([pattern]) => pattern.test(name));
+  return match ? match[1] : "";
+}
+
 function speakerPhotoHTML(speaker, className = "") {
-  const url = String(speaker.PhotoURL || "").trim();
+  // Bundled conference headshots take priority over remote links so featured
+  // speakers remain sharp and reliable on GitHub Pages.
+  const url = localSpeakerPhoto(speaker) || String(speaker.PhotoURL || "").trim();
   if (url) {
     return `<img src="${escapeHTML(url)}" alt="${escapeHTML(speaker.DisplayName || "Speaker")}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=&quot;speaker-initials&quot;>${escapeHTML(speakerInitials(speaker.DisplayName))}</div>'">`;
   }
@@ -935,8 +954,22 @@ function renderSpeakers() {
   };
 
   grid.innerHTML = order.map(type => {
+    const featuredPriority = {
+      "kerry-anne rye": 1,
+      "kerry anne rye": 1,
+      "aleksandra": 2
+    };
     const group = speakers.filter(s => speakerType(s) === type)
-      .sort((a,b) => String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName)));
+      .sort((a,b) => {
+        if (type === "Plenary" || type === "Keynote") {
+          const an = String(a.DisplayName || "").toLowerCase().replace(/^prof\.?\s+/, "").trim();
+          const bn = String(b.DisplayName || "").toLowerCase().replace(/^prof\.?\s+/, "").trim();
+          const ap = an.includes("kerry-anne rye") || an.includes("kerry anne rye") ? 1 : (an.includes("aleksandra") ? 2 : 50);
+          const bp = bn.includes("kerry-anne rye") || bn.includes("kerry anne rye") ? 1 : (bn.includes("aleksandra") ? 2 : 50);
+          if (ap !== bp) return ap - bp;
+        }
+        return String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName));
+      });
     if (!group.length) return "";
     const cards = group.map(s => {
       const talks = getSpeakerPresentations(s);

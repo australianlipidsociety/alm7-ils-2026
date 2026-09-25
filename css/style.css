@@ -3254,3 +3254,51 @@ a.destination-card:hover .destination-image img {
 .reel-map-wrap iframe { width:100%; height:100%; min-height:360px; border:0; display:block; }
 @media (max-width: 980px) { .speaker-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .reel-hero,.reel-gallery,.reel-route-card { grid-template-columns:1fr; } .reel-feature-image { min-height:280px; } }
 @media (max-width: 640px) { .speaker-group-grid { grid-template-columns:1fr; } .speaker-group-heading h2 { font-size:19px; } .reel-hero-copy,.reel-gallery-copy { padding:22px 18px; } .reel-hero-copy h2 { font-size:28px; } .reel-route-card { padding:12px; } .reel-map-wrap,.reel-map-wrap iframe { min-height:320px; } }
+
+
+/* 2026-09-25: wider sponsor cards for horizontal logos */
+.sponsor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.sponsor-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 42%) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 18px;
+  min-height: 170px;
+}
+.sponsor-card.platinum {
+  grid-column: span 2;
+  grid-template-columns: minmax(240px, 34%) minmax(0, 1fr);
+}
+.sponsor-logo-wrap,
+.sponsor-card.platinum .sponsor-logo-wrap {
+  min-height: 130px;
+  padding: 22px;
+}
+.sponsor-logo-wrap img,
+.sponsor-card.platinum .sponsor-logo-wrap img {
+  width: 100%;
+  max-width: 310px;
+  height: auto;
+  max-height: 105px;
+  object-fit: contain;
+}
+.sponsor-copy h3,
+.sponsor-card.platinum .sponsor-copy h3 { margin-top: 2px; }
+@media (max-width: 900px) {
+  .sponsor-grid { grid-template-columns: 1fr; }
+  .sponsor-card, .sponsor-card.platinum { grid-column: auto; grid-template-columns: minmax(150px, 38%) minmax(0,1fr); }
+}
+@media (max-width: 600px) {
+  .sponsor-card, .sponsor-card.platinum { grid-template-columns: 1fr; }
+  .sponsor-logo-wrap, .sponsor-card.platinum .sponsor-logo-wrap { min-height: 110px; }
+  .sponsor-logo-wrap img, .sponsor-card.platinum .sponsor-logo-wrap img { max-width: 280px; max-height: 90px; }
+}
+
+/* Local featured-speaker portraits: favour faces when portrait images are cropped into cards. */
+.speaker-photo-wrap img,
+.speaker-modal-photo img {
+  object-position: center 22%;
+}
