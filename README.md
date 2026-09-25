@@ -32,3 +32,6 @@ Affiliations:
 `1^Murdoch University; 2^Curtin University`
 
 This displays as Jane Smith¹; John Doe¹,²; Alex Lee², followed by numbered affiliations. Semicolons between authors/affiliations are recommended.
+
+## Speaker categories (2026-09 update)
+Add a new `SpeakerType` column to the **SPEAKERS** sheet as column K. Use exactly one of these values for each speaker: `Plenary`, `Keynote`, `Sponsor Speaker (SCIEX)`, or `Oral`. The Speakers page groups people automatically in that order. The app now reads SPEAKERS range `A4:K`.

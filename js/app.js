@@ -611,7 +611,26 @@ function renderLoadError(error) {
 
 
 function speakerInitials(name) {
-  return String(name || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || "").join("") || "?";
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  const first = parts[0][0] || "";
+  const last = parts.length > 1 ? (parts[parts.length - 1][0] || "") : (parts[0][1] || "");
+  return (first + last).toUpperCase() || "?";
+}
+
+function speakerType(speaker) {
+  const raw = String(speaker.SpeakerType || "").trim();
+  if (/plenary/i.test(raw)) return "Plenary";
+  if (/keynote/i.test(raw)) return "Keynote";
+  if (/sponsor|sciex/i.test(raw)) return "Sponsor Speaker (SCIEX)";
+  return "Oral";
+}
+
+function speakerTypeClass(type) {
+  if (type === "Plenary") return "plenary";
+  if (type === "Keynote") return "keynote";
+  if (type.startsWith("Sponsor")) return "sponsor";
+  return "oral";
 }
 
 function speakerPhotoHTML(speaker, className = "") {
@@ -897,40 +916,43 @@ function renderSpeakers() {
   if (!grid || !count) return;
 
   const query = String(search?.value || "").trim().toLowerCase();
-
   const speakers = DB.speakers
     .filter(s => String(s.DisplayName || "").trim())
-    .filter(s => {
-      if (!query) return true;
-      return [s.DisplayName, s.Affiliation, s.Country, s.Bio].join(" ").toLowerCase().includes(query);
-    })
-    .sort((a, b) => {
-      const featuredA = /^(yes|true|1)$/i.test(String(a.Featured || "")) ? 0 : 1;
-      const featuredB = /^(yes|true|1)$/i.test(String(b.Featured || "")) ? 0 : 1;
-      return featuredA - featuredB || String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName));
-    });
+    .filter(s => !query || [s.DisplayName, s.Affiliation, s.Country, s.Bio, s.SpeakerType].join(" ").toLowerCase().includes(query));
 
   count.textContent = `${speakers.length} speaker${speakers.length === 1 ? "" : "s"}`;
-
   if (!speakers.length) {
     grid.innerHTML = `<div class="directory-empty">No speakers match your search.</div>`;
     return;
   }
 
-  grid.innerHTML = speakers.map(s => {
-    const talks = getSpeakerPresentations(s);
-    return `<button class="speaker-card-live" type="button" data-open-speaker="${escapeHTML(s.SpeakerID)}">
-      <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}</div>
-      <div class="speaker-card-copy">
-        <h3>${escapeHTML(s.DisplayName)}</h3>
-        <div class="speaker-affiliation">${escapeHTML(s.Affiliation || "")}</div>
-        ${s.Country ? `<div class="speaker-country">${escapeHTML(s.Country)}</div>` : ""}
-        ${talks.length ? `<span class="speaker-talk-count">${talks.length} presentation${talks.length === 1 ? "" : "s"}</span>` : ""}
-      </div>
-    </button>`;
+  const order = ["Plenary", "Keynote", "Sponsor Speaker (SCIEX)", "Oral"];
+  const labels = {
+    "Plenary": "Plenary Speakers",
+    "Keynote": "Keynote Speakers",
+    "Sponsor Speaker (SCIEX)": "Sponsor Speaker (SCIEX)",
+    "Oral": "Oral Speakers"
+  };
+
+  grid.innerHTML = order.map(type => {
+    const group = speakers.filter(s => speakerType(s) === type)
+      .sort((a,b) => String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName)));
+    if (!group.length) return "";
+    const cards = group.map(s => {
+      const talks = getSpeakerPresentations(s);
+      return `<button class="speaker-card-live" type="button" data-open-speaker="${escapeHTML(s.SpeakerID)}">
+        <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}</div>
+        <div class="speaker-card-copy">
+          <div class="speaker-name-line"><h3>${escapeHTML(s.DisplayName)}</h3><span class="speaker-type-badge ${speakerTypeClass(type)}">${escapeHTML(type === "Sponsor Speaker (SCIEX)" ? "SCIEX" : type)}</span></div>
+          <div class="speaker-affiliation">${escapeHTML(s.Affiliation || "")}</div>
+          ${s.Country ? `<div class="speaker-country">${escapeHTML(s.Country)}</div>` : ""}
+          ${talks.length ? `<span class="speaker-talk-count">${talks.length} presentation${talks.length === 1 ? "" : "s"}</span>` : ""}
+        </div>
+      </button>`;
+    }).join("");
+    return `<section class="speaker-group speaker-group-${speakerTypeClass(type)}"><div class="speaker-group-heading"><h2>${labels[type]}</h2><span>${group.length}</span></div><div class="speaker-group-grid">${cards}</div></section>`;
   }).join("");
 }
-
 function openSpeaker(speakerId) {
   const speaker = DB.speakers.find(s => String(s.SpeakerID) === String(speakerId));
   const modal = document.querySelector("#speaker-modal");
@@ -1130,30 +1152,80 @@ function closeSponsorAbstract() {
 
 
 function renderPresenterInfo() {
-  const deadlineEl = document.getElementById("oral-upload-deadline");
+  const setting = (key, fallback = "") => {
+    const value = String(DB.settings[key] || "").trim();
+    return value || fallback;
+  };
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+
+  const setHTML = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = value;
+  };
+
+  setText("presenter-intro",
+    setting("PresenterIntro", "Key information for oral and poster presenters at ALM7 & the 5th iLS Conference.")
+  );
+
+  const oralFormat = setting("OralFormat", "16:9");
+  const oralFormatLabel = setting("OralFormatLabel", "Widescreen slide format");
+  setText("oral-format-short", oralFormat);
+  setText("oral-format-label", oralFormatLabel);
+  setHTML("oral-format-text",
+    escapeHTML(setting("OralFormatText", `Prepare your presentation in widescreen ${oralFormat} format.`))
+  );
+  setText("oral-instructions",
+    setting("OralInstructions", "Please upload your final presentation before the conference using the link below.")
+  );
+
+  const deadline = setting("OralUploadDeadline", "to be confirmed");
+  setHTML("oral-upload-deadline", `Upload deadline: <strong>${escapeHTML(deadline)}</strong>.`);
+
   const uploadLink = document.getElementById("oral-upload-link");
-  if (!deadlineEl || !uploadLink) return;
-
-  const deadline = String(DB.settings.OralUploadDeadline || "").trim();
-  const url = String(DB.settings.OralUploadURL || "").trim();
-
-  deadlineEl.innerHTML = `Upload deadline: <strong>${escapeHTML(deadline || "to be confirmed")}</strong>.`;
-
-  if (url) {
-    uploadLink.href = url;
-    uploadLink.target = "_blank";
-    uploadLink.rel = "noopener";
-    uploadLink.classList.remove("disabled");
-    uploadLink.removeAttribute("aria-disabled");
-    uploadLink.textContent = "Upload oral presentation →";
-  } else {
-    uploadLink.href = "#";
-    uploadLink.removeAttribute("target");
-    uploadLink.classList.add("disabled");
-    uploadLink.setAttribute("aria-disabled", "true");
-    uploadLink.textContent = "Upload presentation — link coming soon";
+  const url = setting("OralUploadURL");
+  const buttonText = setting("OralUploadButtonText", "Upload oral presentation →");
+  if (uploadLink) {
+    if (url) {
+      uploadLink.href = url;
+      uploadLink.target = "_blank";
+      uploadLink.rel = "noopener";
+      uploadLink.classList.remove("disabled");
+      uploadLink.removeAttribute("aria-disabled");
+      uploadLink.textContent = buttonText;
+    } else {
+      uploadLink.href = "#";
+      uploadLink.removeAttribute("target");
+      uploadLink.classList.add("disabled");
+      uploadLink.setAttribute("aria-disabled", "true");
+      uploadLink.textContent = "Upload presentation — link coming soon";
+    }
   }
+
+  const posterSize = setting("PosterSize", "A0");
+  const posterOrientation = setting("PosterOrientation", "Portrait orientation");
+  setText("poster-size-short", posterSize);
+  setText("poster-orientation", posterOrientation);
+  setHTML("poster-size-text",
+    escapeHTML(setting("PosterSizeText", `Prepare your poster at ${posterSize} size in ${posterOrientation.toLowerCase()}.`))
+  );
+  setHTML("poster-setup-time",
+    escapeHTML(setting("PosterSetupTime", "Posters can be hung from 3:00 PM on Sunday 18 October."))
+  );
+  setHTML("poster-supplies",
+    escapeHTML(setting("PosterSupplies", "Pin tacks will be available from the registration desk if needed."))
+  );
+  setHTML("poster-location",
+    escapeHTML(setting("PosterLocation", "Poster presentations and sponsor displays are located in the Silver Room."))
+  );
+  setText("presenter-contact",
+    setting("PresenterContact", "Additional presenter instructions and upload details can be added here as they are confirmed.")
+  );
 }
+
 
 function renderAll() {
   updateFavouriteCount();

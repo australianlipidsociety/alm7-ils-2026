@@ -3196,3 +3196,61 @@ a.destination-card:hover .destination-image img {
 .abstract-modal-affiliations {
   margin-top: 7px;
 }
+
+
+/* Keep the expanded desktop navigation usable as tabs are added. */
+@media (min-width: 801px) and (max-width: 1180px) {
+  .desktop-nav {
+    gap: 2px;
+  }
+
+  .nav-link {
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+
+  .brand-button {
+    width: 155px;
+    flex: 0 0 155px;
+  }
+}
+
+/* 2026-09-25: speaker categories + Reel Kitchen conference dinner */
+#speaker-grid.speaker-grid { display:block; }
+.speaker-group { margin: 0 0 34px; }
+.speaker-group-heading { display:flex; align-items:center; gap:10px; margin:0 0 14px; padding-bottom:9px; border-bottom:1px solid var(--line); }
+.speaker-group-heading h2 { margin:0; color:var(--navy); font-size:22px; }
+.speaker-group-heading span { min-width:26px; height:26px; padding:0 8px; display:inline-flex; align-items:center; justify-content:center; border-radius:999px; background:#EEF3F7; color:var(--navy); font-size:12px; font-weight:800; }
+.speaker-group-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.speaker-name-line { display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
+.speaker-name-line h3 { margin:0; }
+.speaker-type-badge { display:inline-flex; align-items:center; min-height:22px; padding:3px 8px; border-radius:999px; font-size:10px; line-height:1; font-weight:800; letter-spacing:.02em; }
+.speaker-type-badge.plenary { color:#8A4C12; background:#FFF0D9; }
+.speaker-type-badge.keynote { color:#08716F; background:#E2F5F2; }
+.speaker-type-badge.sponsor { color:#5C3AA7; background:#EFE7FF; }
+.speaker-type-badge.oral { color:#315B98; background:#E8F0FF; }
+.speaker-initials { text-transform:uppercase; }
+
+.reel-hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,.9fr); overflow:hidden; border:1px solid var(--line); border-radius:18px; background:#fff; box-shadow:0 12px 30px rgba(23,63,103,.08); }
+.reel-hero-copy { padding:34px; }
+.reel-hero-copy h2 { margin:5px 0 12px; color:var(--navy); font-size:34px; }
+.reel-hero-copy p { color:var(--muted); line-height:1.65; }
+.reel-feature-image { width:100%; height:100%; min-height:340px; object-fit:cover; }
+.reel-actions { display:flex; flex-wrap:wrap; gap:10px; margin:22px 0; }
+.venue-map-button.secondary { color:var(--navy); background:#EEF3F7; }
+.reel-address { padding:14px 16px; border-left:3px solid var(--teal); background:#F5FAFB; border-radius:0 10px 10px 0; color:var(--ink); line-height:1.55; }
+.reel-gallery { display:grid; grid-template-columns:1.1fr .9fr; gap:0; margin-top:18px; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:#fff; }
+.reel-gallery figure { margin:0; position:relative; min-height:280px; }
+.reel-gallery img { width:100%; height:100%; min-height:280px; object-fit:cover; display:block; }
+.reel-gallery figcaption { position:absolute; left:14px; bottom:14px; padding:7px 10px; border-radius:8px; background:rgba(10,32,55,.82); color:#fff; font-size:12px; }
+.reel-gallery-copy { padding:34px; align-self:center; }
+.reel-gallery-copy h3 { margin:6px 0 10px; color:var(--navy); font-size:25px; }
+.reel-gallery-copy p { margin:0; color:var(--muted); line-height:1.6; }
+.reel-route-card { display:grid; grid-template-columns:.8fr 1.2fr; gap:18px; margin-top:18px; padding:20px; border:1px solid var(--line); border-radius:16px; background:#fff; }
+.reel-route-copy { padding:12px; align-self:center; }
+.reel-route-copy h3 { margin:6px 0 10px; color:var(--navy); font-size:24px; }
+.reel-route-copy p { color:var(--muted); line-height:1.6; }
+.reel-map-wrap { overflow:hidden; min-height:360px; border-radius:13px; background:#EEF3F7; }
+.reel-map-wrap iframe { width:100%; height:100%; min-height:360px; border:0; display:block; }
+@media (max-width: 980px) { .speaker-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .reel-hero,.reel-gallery,.reel-route-card { grid-template-columns:1fr; } .reel-feature-image { min-height:280px; } }
+@media (max-width: 640px) { .speaker-group-grid { grid-template-columns:1fr; } .speaker-group-heading h2 { font-size:19px; } .reel-hero-copy,.reel-gallery-copy { padding:22px 18px; } .reel-hero-copy h2 { font-size:28px; } .reel-route-card { padding:12px; } .reel-map-wrap,.reel-map-wrap iframe { min-height:320px; } }
