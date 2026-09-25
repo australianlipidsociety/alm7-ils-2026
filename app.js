@@ -611,7 +611,26 @@ function renderLoadError(error) {
 
 
 function speakerInitials(name) {
-  return String(name || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase() || "").join("") || "?";
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  const first = parts[0][0] || "";
+  const last = parts.length > 1 ? (parts[parts.length - 1][0] || "") : (parts[0][1] || "");
+  return (first + last).toUpperCase() || "?";
+}
+
+function speakerType(speaker) {
+  const raw = String(speaker.SpeakerType || "").trim();
+  if (/plenary/i.test(raw)) return "Plenary";
+  if (/keynote/i.test(raw)) return "Keynote";
+  if (/sponsor|sciex/i.test(raw)) return "Sponsor Speaker (SCIEX)";
+  return "Oral";
+}
+
+function speakerTypeClass(type) {
+  if (type === "Plenary") return "plenary";
+  if (type === "Keynote") return "keynote";
+  if (type.startsWith("Sponsor")) return "sponsor";
+  return "oral";
 }
 
 function speakerPhotoHTML(speaker, className = "") {
@@ -897,40 +916,43 @@ function renderSpeakers() {
   if (!grid || !count) return;
 
   const query = String(search?.value || "").trim().toLowerCase();
-
   const speakers = DB.speakers
     .filter(s => String(s.DisplayName || "").trim())
-    .filter(s => {
-      if (!query) return true;
-      return [s.DisplayName, s.Affiliation, s.Country, s.Bio].join(" ").toLowerCase().includes(query);
-    })
-    .sort((a, b) => {
-      const featuredA = /^(yes|true|1)$/i.test(String(a.Featured || "")) ? 0 : 1;
-      const featuredB = /^(yes|true|1)$/i.test(String(b.Featured || "")) ? 0 : 1;
-      return featuredA - featuredB || String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName));
-    });
+    .filter(s => !query || [s.DisplayName, s.Affiliation, s.Country, s.Bio, s.SpeakerType].join(" ").toLowerCase().includes(query));
 
   count.textContent = `${speakers.length} speaker${speakers.length === 1 ? "" : "s"}`;
-
   if (!speakers.length) {
     grid.innerHTML = `<div class="directory-empty">No speakers match your search.</div>`;
     return;
   }
 
-  grid.innerHTML = speakers.map(s => {
-    const talks = getSpeakerPresentations(s);
-    return `<button class="speaker-card-live" type="button" data-open-speaker="${escapeHTML(s.SpeakerID)}">
-      <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}</div>
-      <div class="speaker-card-copy">
-        <h3>${escapeHTML(s.DisplayName)}</h3>
-        <div class="speaker-affiliation">${escapeHTML(s.Affiliation || "")}</div>
-        ${s.Country ? `<div class="speaker-country">${escapeHTML(s.Country)}</div>` : ""}
-        ${talks.length ? `<span class="speaker-talk-count">${talks.length} presentation${talks.length === 1 ? "" : "s"}</span>` : ""}
-      </div>
-    </button>`;
+  const order = ["Plenary", "Keynote", "Sponsor Speaker (SCIEX)", "Oral"];
+  const labels = {
+    "Plenary": "Plenary Speakers",
+    "Keynote": "Keynote Speakers",
+    "Sponsor Speaker (SCIEX)": "Sponsor Speaker (SCIEX)",
+    "Oral": "Oral Speakers"
+  };
+
+  grid.innerHTML = order.map(type => {
+    const group = speakers.filter(s => speakerType(s) === type)
+      .sort((a,b) => String(a.LastName || a.DisplayName).localeCompare(String(b.LastName || b.DisplayName)));
+    if (!group.length) return "";
+    const cards = group.map(s => {
+      const talks = getSpeakerPresentations(s);
+      return `<button class="speaker-card-live" type="button" data-open-speaker="${escapeHTML(s.SpeakerID)}">
+        <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}</div>
+        <div class="speaker-card-copy">
+          <div class="speaker-name-line"><h3>${escapeHTML(s.DisplayName)}</h3><span class="speaker-type-badge ${speakerTypeClass(type)}">${escapeHTML(type === "Sponsor Speaker (SCIEX)" ? "SCIEX" : type)}</span></div>
+          <div class="speaker-affiliation">${escapeHTML(s.Affiliation || "")}</div>
+          ${s.Country ? `<div class="speaker-country">${escapeHTML(s.Country)}</div>` : ""}
+          ${talks.length ? `<span class="speaker-talk-count">${talks.length} presentation${talks.length === 1 ? "" : "s"}</span>` : ""}
+        </div>
+      </button>`;
+    }).join("");
+    return `<section class="speaker-group speaker-group-${speakerTypeClass(type)}"><div class="speaker-group-heading"><h2>${labels[type]}</h2><span>${group.length}</span></div><div class="speaker-group-grid">${cards}</div></section>`;
   }).join("");
 }
-
 function openSpeaker(speakerId) {
   const speaker = DB.speakers.find(s => String(s.SpeakerID) === String(speakerId));
   const modal = document.querySelector("#speaker-modal");
