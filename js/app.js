@@ -974,9 +974,9 @@ function renderSpeakers() {
     const cards = group.map(s => {
       const talks = getSpeakerPresentations(s);
       return `<button class="speaker-card-live" type="button" data-open-speaker="${escapeHTML(s.SpeakerID)}">
-        <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}</div>
+        <div class="speaker-photo-wrap">${speakerPhotoHTML(s)}<span class="speaker-type-badge speaker-photo-badge ${speakerTypeClass(type)}">${escapeHTML(type === "Sponsor Speaker (SCIEX)" ? "SCIEX" : type)}</span></div>
         <div class="speaker-card-copy">
-          <div class="speaker-name-line"><h3>${escapeHTML(s.DisplayName)}</h3><span class="speaker-type-badge ${speakerTypeClass(type)}">${escapeHTML(type === "Sponsor Speaker (SCIEX)" ? "SCIEX" : type)}</span></div>
+          <div class="speaker-name-line"><h3>${escapeHTML(s.DisplayName)}</h3></div>
           <div class="speaker-affiliation">${escapeHTML(s.Affiliation || "")}</div>
           ${s.Country ? `<div class="speaker-country">${escapeHTML(s.Country)}</div>` : ""}
           ${talks.length ? `<span class="speaker-talk-count">${talks.length} presentation${talks.length === 1 ? "" : "s"}</span>` : ""}

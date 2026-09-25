@@ -1655,6 +1655,7 @@ h2 { font-size: 28px; }
 }
 
 .speaker-photo-wrap {
+  position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: linear-gradient(135deg, #EAF5F7, #F1EEF8);
@@ -3301,4 +3302,16 @@ a.destination-card:hover .destination-image img {
 .speaker-photo-wrap img,
 .speaker-modal-photo img {
   object-position: center 22%;
+}
+
+/* 2026-09-25: pin speaker category badge to the portrait so name length cannot move it. */
+.speaker-photo-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(23,63,103,.14);
+  border: 1px solid rgba(255,255,255,.72);
+  backdrop-filter: blur(2px);
 }
