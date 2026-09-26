@@ -3315,3 +3315,148 @@ a.destination-card:hover .destination-image img {
   border: 1px solid rgba(255,255,255,.72);
   backdrop-filter: blur(2px);
 }
+
+
+/* ===== 2026-09-26 homepage / Reel Kitchen / sponsor refinements ===== */
+
+/* Reel Kitchen branded title */
+.reel-logo-title {
+  margin: 8px 0 16px;
+  display: flex;
+  align-items: center;
+}
+.reel-logo-title img {
+  display: block;
+  width: min(315px, 82%);
+  height: auto;
+  object-fit: contain;
+}
+
+/* Desktop sponsors: one generous horizontal card per row.
+   This gives landscape logos substantially more usable width. */
+.sponsor-grid {
+  grid-template-columns: 1fr !important;
+  gap: 16px;
+}
+.sponsor-card,
+.sponsor-card.platinum {
+  grid-column: auto !important;
+  display: grid !important;
+  grid-template-columns: minmax(300px, 36%) minmax(0, 1fr) !important;
+  gap: 24px !important;
+  min-height: 150px;
+  padding: 20px 24px !important;
+  align-items: center;
+}
+.sponsor-logo-wrap,
+.sponsor-card.platinum .sponsor-logo-wrap {
+  min-height: 118px !important;
+  height: 118px;
+  padding: 14px 20px !important;
+  overflow: hidden;
+}
+.sponsor-logo-wrap img,
+.sponsor-card.platinum .sponsor-logo-wrap img {
+  display: block;
+  width: 100% !important;
+  max-width: 360px !important;
+  height: 90px !important;
+  max-height: 90px !important;
+  object-fit: contain !important;
+}
+.sponsor-copy h3,
+.sponsor-card.platinum .sponsor-copy h3 {
+  margin: 0 0 5px !important;
+  font-size: 21px;
+}
+
+/* Tablet/mobile sponsors remain stacked and readable. */
+@media (max-width: 760px) {
+  .sponsor-card,
+  .sponsor-card.platinum {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+  .sponsor-logo-wrap,
+  .sponsor-card.platinum .sponsor-logo-wrap {
+    height: 104px;
+    min-height: 104px !important;
+  }
+  .sponsor-logo-wrap img,
+  .sponsor-card.platinum .sponsor-logo-wrap img {
+    max-width: 320px !important;
+    height: 78px !important;
+    max-height: 78px !important;
+    margin: auto;
+  }
+}
+
+/* Mobile home: compress navigation cards so Happening Now appears much higher. */
+@media (max-width: 800px) {
+  #page-home .content-wrap {
+    padding-top: 14px;
+  }
+  #page-home .search-box {
+    min-height: 48px;
+    padding: 10px 13px;
+  }
+  #page-home .search-icon {
+    font-size: 22px;
+  }
+  #page-home .quick-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  #page-home .quick-card,
+  #page-home .quick-card-wide {
+    grid-column: auto !important;
+    min-height: 66px;
+    padding: 9px 7px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+  }
+  #page-home .quick-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+  #page-home .quick-title {
+    font-size: 12px;
+    line-height: 1.1;
+  }
+  #page-home .quick-description {
+    display: none;
+  }
+  #page-home .section-heading {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  #page-home .section-heading h2 {
+    margin-top: 2px;
+    font-size: 23px;
+  }
+  #page-home .section-heading .eyebrow {
+    font-size: 9px;
+  }
+  #page-home .now-grid {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Override the older single-column quick-card rule. */
+  #page-home .quick-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .reel-logo-title img {
+    width: min(280px, 88%);
+  }
+}
