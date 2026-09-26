@@ -3460,3 +3460,109 @@ a.destination-card:hover .destination-image img {
     width: min(280px, 88%);
   }
 }
+
+
+/* ===== 2026-09-26 sponsor layout refinement v2 ===== */
+
+/* Platinum tag: cooler conference blue rather than grey. */
+.sponsor-tier-chip.platinum {
+  background: #E7F2FA !important;
+  color: #173F67 !important;
+  border-color: #AFCBE0 !important;
+}
+
+/* ECR Awards and Event Sponsor use a compact icon marker rather than a text pill. */
+.sponsor-tier-chip.ecr-awards,
+.sponsor-tier-chip.ecr-award,
+.sponsor-tier-chip.event-sponsor {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 !important;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.sponsor-tier-chip.ecr-awards,
+.sponsor-tier-chip.ecr-award {
+  background: #FFF5D7;
+  color: #946B11;
+  border: 1px solid #ECD89B;
+}
+.sponsor-tier-chip.event-sponsor {
+  background: #E9F6F8;
+  color: #087F9D;
+  border: 1px solid #B7DDE5;
+}
+
+/* Platinum / Gold / Silver / Bronze:
+   make the landscape logo a full-width banner ABOVE the description. */
+.sponsor-card.platinum,
+.sponsor-card.gold,
+.sponsor-card.silver,
+.sponsor-card.bronze {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+  padding: 20px 24px !important;
+}
+
+.sponsor-card.platinum .sponsor-logo-wrap,
+.sponsor-card.gold .sponsor-logo-wrap,
+.sponsor-card.silver .sponsor-logo-wrap,
+.sponsor-card.bronze .sponsor-logo-wrap {
+  width: 100% !important;
+  height: 126px !important;
+  min-height: 126px !important;
+  box-sizing: border-box;
+  padding: 14px 28px !important;
+}
+
+.sponsor-card.platinum .sponsor-logo-wrap img,
+.sponsor-card.gold .sponsor-logo-wrap img,
+.sponsor-card.silver .sponsor-logo-wrap img,
+.sponsor-card.bronze .sponsor-logo-wrap img {
+  width: auto !important;
+  max-width: min(680px, 92%) !important;
+  height: auto !important;
+  max-height: 96px !important;
+  object-fit: contain !important;
+  margin: auto;
+}
+
+.sponsor-card.platinum .sponsor-copy,
+.sponsor-card.gold .sponsor-copy,
+.sponsor-card.silver .sponsor-copy,
+.sponsor-card.bronze .sponsor-copy {
+  width: 100%;
+}
+
+.sponsor-card.platinum .sponsor-copy h3,
+.sponsor-card.gold .sponsor-copy h3,
+.sponsor-card.silver .sponsor-copy h3,
+.sponsor-card.bronze .sponsor-copy h3 {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .sponsor-card.platinum .sponsor-logo-wrap,
+  .sponsor-card.gold .sponsor-logo-wrap,
+  .sponsor-card.silver .sponsor-logo-wrap,
+  .sponsor-card.bronze .sponsor-logo-wrap {
+    height: 108px !important;
+    min-height: 108px !important;
+    padding: 12px 18px !important;
+  }
+
+  .sponsor-card.platinum .sponsor-logo-wrap img,
+  .sponsor-card.gold .sponsor-logo-wrap img,
+  .sponsor-card.silver .sponsor-logo-wrap img,
+  .sponsor-card.bronze .sponsor-logo-wrap img {
+    max-width: 92% !important;
+    max-height: 80px !important;
+  }
+}

@@ -1112,8 +1112,12 @@ function renderSponsors() {
     const tierClass = tier.toLowerCase().replace(/\s+/g,"-");
     return `<section class="sponsor-tier-section">
       <div class="sponsor-tier-heading">
-        <span class="sponsor-tier-chip ${escapeHTML(tierClass)}">${escapeHTML(tier)}</span>
-        <h2>${escapeHTML(tier)} Sponsor${rows.length === 1 ? "" : "s"}</h2>
+        <span class="sponsor-tier-chip ${escapeHTML(tierClass)}" aria-hidden="true">${
+          /ecr\s*awards?/i.test(tier) ? "🏆" :
+          /event\s*sponsor/i.test(tier) ? "✦" :
+          escapeHTML(tier)
+        }</span>
+        <h2>${escapeHTML(tier)}${/sponsor/i.test(tier) ? "" : ` Sponsor${rows.length === 1 ? "" : "s"}`}</h2>
       </div>
       <div class="sponsor-grid">
         ${rows.map(sponsor => renderSponsorCard(sponsor, tier)).join("")}
