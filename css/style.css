@@ -3566,3 +3566,42 @@ a.destination-card:hover .destination-image img {
     max-height: 80px !important;
   }
 }
+
+
+/* ===== 2026-10-01 desktop nav + sponsor logo refinement ===== */
+
+/* Keep every desktop navigation label on one line. */
+@media (min-width: 801px) {
+  .desktop-nav {
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+  }
+  .desktop-nav .nav-link {
+    white-space: nowrap !important;
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+    line-height: 1.15;
+    flex: 0 0 auto;
+  }
+  .brand-button {
+    width: 205px;
+    flex: 0 0 205px;
+  }
+}
+
+/* Give the three logos that had unusually large built-in whitespace
+   a little more display height after trimming their image canvases. */
+.sponsor-logo-wrap img[src*="bruker"],
+.sponsor-logo-wrap img[src*="ansto-ndf"],
+.sponsor-logo-wrap img[src*="waters"] {
+  max-height: 108px !important;
+  max-width: 96% !important;
+}
+
+@media (max-width: 760px) {
+  .sponsor-logo-wrap img[src*="bruker"],
+  .sponsor-logo-wrap img[src*="ansto-ndf"],
+  .sponsor-logo-wrap img[src*="waters"] {
+    max-height: 88px !important;
+  }
+}
