@@ -714,7 +714,6 @@ function getPosterNumberForAbstract(abstractId) {
 }
 
 function posterNumberForProgramPresentation(presentation) {
-  if (!/poster/i.test(String(presentation?.type || ""))) return null;
   return getPosterNumberForAbstract(presentation?.abstractId);
 }
 
