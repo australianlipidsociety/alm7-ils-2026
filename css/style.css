@@ -3605,3 +3605,113 @@ a.destination-card:hover .destination-image img {
     max-height: 88px !important;
   }
 }
+
+
+/* ===== 2026-10-03 program PDF, booklet link and poster numbering ===== */
+.program-pdf-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.abstract-booklet-link {
+  margin: -2px 0 18px;
+}
+.abstract-booklet-link a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: var(--navy);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  box-shadow: 0 5px 14px rgba(23,63,103,.13);
+}
+.abstract-booklet-link a:hover {
+  background: var(--teal);
+}
+
+.abstract-badge.poster-number,
+.poster-number-inline,
+.poster-number-modal {
+  background: #FFF5D7;
+  color: #795A12;
+  border: 1px solid #E6D18F;
+  font-weight: 900;
+}
+.poster-number-inline {
+  display: inline-flex;
+  padding: 2px 7px;
+  margin-right: 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  vertical-align: 1px;
+}
+.poster-number-modal {
+  display: inline-flex;
+  padding: 4px 10px;
+  margin: 6px 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+
+
+/* ===== 2026-10-03 mobile modal + poster number reliability fix ===== */
+
+/* Program/session popups must sit above the sticky mobile header. */
+.modal {
+  z-index: 5200 !important;
+}
+
+/* Keep modal close controls visible while the card scrolls. */
+.session-modal-card,
+.directory-modal-card {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 800px) {
+  .modal,
+  .directory-modal {
+    padding-top: max(10px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    align-items: flex-start !important;
+  }
+
+  .session-modal-card {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    margin: 0 auto !important;
+    padding: 20px 16px 24px !important;
+  }
+
+  .directory-modal-card {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    margin: 0 auto !important;
+    padding: 20px 16px 24px !important;
+  }
+
+  .modal-close,
+  .directory-modal-close {
+    top: 0 !important;
+    z-index: 20 !important;
+    box-shadow: 0 2px 10px rgba(16,45,74,.14);
+  }
+
+  .modal-title {
+    margin-right: 42px !important;
+    font-size: 23px !important;
+  }
+
+  .abstract-modal-card h2,
+  .speaker-modal-card h2 {
+    margin-right: 42px !important;
+    font-size: 22px !important;
+  }
+}

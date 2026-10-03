@@ -566,8 +566,14 @@ function openSessionModal(id) {
       </div>
       ${p.abstract ? `<div id="abstract-${i}" class="abstract-text">${escapeHTML(p.abstract)}</div>` : ""}
     </div>`).join("")}</div>` : ""}`;
+  content.scrollTop = 0;
+  modal.scrollTop = 0;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+  requestAnimationFrame(() => {
+    content.scrollTop = 0;
+    modal.scrollTop = 0;
+  });
   document.body.style.overflow = "hidden";
 }
 
@@ -707,7 +713,7 @@ function getAbstractPresentation(abstractId) {
 function getPosterNumberForAbstract(abstractId) {
   const abs = DB.abstracts.find(a => String(a.AbstractID || "") === String(abstractId || ""));
   const submission = String(abs?.SubmissionNumber || "").trim();
-  const match = submission.match(/^PP-0*(\\d+)$/i);
+  const match = submission.match(/^PP-0*(\d+)$/i);
   if (!match) return null;
   const number = Number(match[1]);
   return Number.isFinite(number) && number > 0 ? number : null;
@@ -991,8 +997,14 @@ function openAbstract(abstractId) {
     ${abs.Keywords ? `<div class="abstract-modal-keywords"><strong>Keywords:</strong> ${escapeHTML(abs.Keywords)}</div>` : ""}
   `;
 
+  content.scrollTop = 0;
+  modal.scrollTop = 0;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
+  requestAnimationFrame(() => {
+    content.scrollTop = 0;
+    modal.scrollTop = 0;
+  });
   document.body.style.overflow = "hidden";
 }
 
