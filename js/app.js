@@ -314,6 +314,22 @@ function buildDatabase(raw) {
     };
   }).sort((a,b) => (a.date+a.start).localeCompare(b.date+b.start) || a.sortOrder - b.sortOrder);
 
+  // Poster sessions are stored as their own SESSIONS rows, while the visible
+  // program uses the lunchtime "Lunch & Poster Session" rows. Pair them by
+  // chronological order so opening the lunch slot shows every numbered poster.
+  const posterSessions = DB.sessions
+    .filter(s => /poster/i.test(String(s.SessionType || "")))
+    .sort((a,b) => String(a.SessionID || "").localeCompare(String(b.SessionID || "")));
+  const posterProgramItems = DB.program
+    .filter(item => /poster\s*session/i.test(String(item.title || "")))
+    .sort((a,b) => (a.date+a.start).localeCompare(b.date+b.start));
+  posterProgramItems.forEach((item, index) => {
+    const posterSession = posterSessions[index];
+    if (!posterSession) return;
+    item.sessionId = posterSession.SessionID;
+    item.presentations = presentationsBySession[posterSession.SessionID] || [];
+  });
+
   DB.loaded = true;
 }
 
@@ -545,7 +561,7 @@ function openSessionModal(id) {
     ${item.presentations.length ? `<div class="presentation-list">${item.presentations.map((p, i) => `<div class="presentation">
       <div class="presentation-head">
         <div class="presentation-time">${escapeHTML(formatTime(p.time))}</div>
-        <div><div class="presentation-title">${escapeHTML(p.title)}</div><div class="presentation-authors">${escapeHTML(p.authors || p.speaker)}${p.affiliations ? `<br>${escapeHTML(p.affiliations)}` : ""}</div></div>
+        <div><div class="presentation-title">${posterNumberForProgramPresentation(p) ? `<span class="poster-number-inline">Poster ${posterNumberForProgramPresentation(p)}</span> ` : ""}${escapeHTML(p.title)}</div><div class="presentation-authors">${escapeHTML(p.authors || p.speaker)}${p.affiliations ? `<br>${escapeHTML(p.affiliations)}` : ""}</div></div>
         ${p.abstract ? `<button class="abstract-toggle" onclick="toggleAbstract(${i})">Abstract ▾</button>` : ""}
       </div>
       ${p.abstract ? `<div id="abstract-${i}" class="abstract-text">${escapeHTML(p.abstract)}</div>` : ""}
@@ -666,8 +682,51 @@ function getPresentationContext(presentation) {
   return { session, program };
 }
 
+function presentationCategoryRank(type) {
+  const value = String(type || "").trim().toLowerCase();
+  if (value.includes("plenary")) return 0;
+  if (value.includes("keynote")) return 1;
+  if (value.includes("sponsor")) return 2;
+  if (value.includes("poster")) return 4;
+  return 3; // oral, rapid fire and other scientific talks
+}
+
+function presentationsForAbstract(abstractId) {
+  return DB.presentations.filter(p => String(p.AbstractID || "") === String(abstractId || ""));
+}
+
 function getAbstractPresentation(abstractId) {
-  return DB.presentations.find(p => p.AbstractID === abstractId) || null;
+  const matches = presentationsForAbstract(abstractId);
+  if (!matches.length) return null;
+  return matches.slice().sort((a,b) =>
+    presentationCategoryRank(a.PresentationType) - presentationCategoryRank(b.PresentationType) ||
+    Number(a.Sequence || 999) - Number(b.Sequence || 999)
+  )[0];
+}
+
+function getPosterNumberForAbstract(abstractId) {
+  const abs = DB.abstracts.find(a => String(a.AbstractID || "") === String(abstractId || ""));
+  const submission = String(abs?.SubmissionNumber || "").trim();
+  const match = submission.match(/^PP-0*(\\d+)$/i);
+  if (!match) return null;
+  const number = Number(match[1]);
+  return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function posterNumberForProgramPresentation(presentation) {
+  if (!/poster/i.test(String(presentation?.type || ""))) return null;
+  return getPosterNumberForAbstract(presentation?.abstractId);
+}
+
+function abstractSpeakerOrder(abs) {
+  const p = getAbstractPresentation(abs.AbstractID);
+  if (!p?.SpeakerID) return 9999;
+  const index = DB.speakers.findIndex(s => String(s.SpeakerID) === String(p.SpeakerID));
+  return index < 0 ? 9999 : index;
+}
+
+function abstractCategoryRank(abs) {
+  return presentationCategoryRank(getAbstractPresentation(abs.AbstractID)?.PresentationType);
 }
 
 
@@ -815,6 +874,19 @@ function renderAbstracts() {
   const query = String(search?.value || "").trim().toLowerCase();
   const selectedTopic = topicSelect.value || "All";
 
+  const bookletHolder = document.querySelector("#abstract-booklet-link");
+  if (bookletHolder) {
+    const bookletURL = String(DB.settings.ConferenceBookletURL || "").trim();
+    const bookletText = String(DB.settings.ConferenceBookletButtonText || "Open interactive conference booklet").trim();
+    if (bookletURL) {
+      bookletHolder.hidden = false;
+      bookletHolder.innerHTML = `<a href="${escapeHTML(bookletURL)}" target="_blank" rel="noopener">${escapeHTML(bookletText)} ↗</a>`;
+    } else {
+      bookletHolder.hidden = true;
+      bookletHolder.innerHTML = "";
+    }
+  }
+
   const abstracts = DB.abstracts
     .filter(a => a.AbstractID || a.Title)
     .filter(a => {
@@ -826,7 +898,19 @@ function renderAbstracts() {
       ].join(" ").toLowerCase();
       return haystack.includes(query);
     })
-    .sort((a, b) => String(a.Title || "").localeCompare(String(b.Title || "")));
+    .sort((a, b) => {
+      const categoryDiff = abstractCategoryRank(a) - abstractCategoryRank(b);
+      if (categoryDiff) return categoryDiff;
+
+      const speakerDiff = abstractSpeakerOrder(a) - abstractSpeakerOrder(b);
+      if (speakerDiff) return speakerDiff;
+
+      const posterA = getPosterNumberForAbstract(a.AbstractID) || 9999;
+      const posterB = getPosterNumberForAbstract(b.AbstractID) || 9999;
+      if (posterA !== posterB) return posterA - posterB;
+
+      return String(a.Title || "").localeCompare(String(b.Title || ""));
+    });
 
   count.textContent = `${abstracts.length} abstract${abstracts.length === 1 ? "" : "s"}`;
 
@@ -839,6 +923,7 @@ function renderAbstracts() {
     const presentation = getAbstractPresentation(abs.AbstractID);
     const context = presentation ? getPresentationContext(presentation) : {};
     const presentationType = presentation?.PresentationType || "";
+    const posterNumber = getPosterNumberForAbstract(abs.AbstractID);
     const topic = abs.Topic || "";
     const preview = String(abs.AbstractText || "").replace(/\s+/g, " ").trim();
     const shortPreview = preview.length > 240 ? `${preview.slice(0, 237)}…` : preview;
@@ -847,6 +932,7 @@ function renderAbstracts() {
       <div class="abstract-card-main">
         <div class="abstract-badges">
           ${presentationType ? `<span class="abstract-badge">${escapeHTML(presentationType)}</span>` : ""}
+          ${posterNumber ? `<span class="abstract-badge poster-number">Poster ${posterNumber}</span>` : ""}
           ${topic ? `<span class="abstract-badge topic">${escapeHTML(topic)}</span>` : ""}
         </div>
         <h3>${escapeHTML(abs.Title || presentation?.Title || "Untitled abstract")}</h3>
@@ -875,6 +961,7 @@ function openAbstract(abstractId) {
   if (!abs || !modal || !content) return;
 
   const presentation = getAbstractPresentation(abs.AbstractID);
+  const posterNumber = getPosterNumberForAbstract(abs.AbstractID);
   const { session, program } = presentation ? getPresentationContext(presentation) : { session: {}, program: {} };
 
   const scheduleBits = [];
@@ -888,6 +975,7 @@ function openAbstract(abstractId) {
 
   content.innerHTML = `
     <span class="eyebrow">${escapeHTML(presentation?.PresentationType || abs.Topic || "Conference abstract")}</span>
+    ${posterNumber ? `<div class="poster-number-modal">Poster ${posterNumber}</div>` : ""}
     <h2 id="abstract-modal-title">${escapeHTML(abs.Title || presentation?.Title || "Untitled abstract")}</h2>
     ${(() => {
       const authorInfo = formatAbstractAuthors(abs, presentation);
@@ -1068,7 +1156,9 @@ function getSponsorScience(sponsor) {
     time: sponsor.PosterTime || (presentation?.StartTime ? formatTime(normaliseTime(presentation.StartTime)) : ""),
     location: sponsor.PosterLocation || linkedProgram?.room || "",
     authors: abstract?.Authors || presentation?.AuthorsDisplay || "",
-    affiliations: abstract?.Affiliations || presentation?.AffiliationsDisplay || ""
+    affiliations: abstract?.Affiliations || presentation?.AffiliationsDisplay || "",
+    abstractRecord: abstract || null,
+    presentationRecord: presentation || null
   };
 }
 
@@ -1169,8 +1259,17 @@ function openSponsorAbstract(sponsorId) {
   content.innerHTML = `
     <span class="eyebrow">${escapeHTML(tier)} sponsor</span>
     <h2 id="sponsor-abstract-title">${escapeHTML(science.title || sponsor.Name)}</h2>
-    ${science.authors ? `<div class="abstract-modal-authors">${escapeHTML(science.authors)}</div>` : ""}
-    ${science.affiliations ? `<div class="abstract-modal-affiliations">${escapeHTML(science.affiliations)}</div>` : ""}
+    ${science.abstractRecord ? (() => {
+      const authorInfo = formatAbstractAuthors(science.abstractRecord, science.presentationRecord);
+      if (!authorInfo.html) return "";
+      return `<div class="abstract-modal-authors">${authorInfo.html}</div>` +
+        (!authorInfo.matched && authorInfo.presenter
+          ? `<div class="presenting-author-fallback">Presenting author: <span class="presenting-author">${escapeHTML(authorInfo.presenter)}</span></div>`
+          : "");
+    })() : (science.authors ? `<div class="abstract-modal-authors">${escapeHTML(science.authors)}</div>` : "")}
+    ${science.abstractRecord?.Affiliations
+      ? `<div class="abstract-modal-affiliations">${formatAbstractAffiliations(science.abstractRecord)}</div>`
+      : (science.affiliations ? `<div class="abstract-modal-affiliations">${escapeHTML(science.affiliations)}</div>` : "")}
     ${(science.time || science.location || ["Gold","Silver"].includes(tier)) ? `<div class="abstract-modal-meta">${escapeHTML([science.time, science.location || (["Gold","Silver"].includes(tier) ? "Silver Room" : "")].filter(Boolean).join(" • "))}</div>` : ""}
     <div class="sponsor-abstract-body">${science.abstractText ? escapeHTML(science.abstractText) : "Abstract text is not yet available."}</div>
   `;
