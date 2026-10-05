@@ -3740,3 +3740,17 @@ a.destination-card:hover .destination-image img {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ===== Abstract publication links ===== */
+.abstract-booklet-link{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:2px 0 20px}
+.abstract-booklet-link .booklet-button{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;min-height:68px;padding:12px 14px;border-radius:14px;text-decoration:none;box-shadow:0 6px 18px rgba(23,63,103,.11);transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+.abstract-booklet-link .booklet-interactive{background:var(--navy);color:#fff}
+.abstract-booklet-link .booklet-pdf{background:#fff;color:var(--navy);border:1px solid rgba(23,63,103,.16)}
+.abstract-booklet-link .booklet-button:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(23,63,103,.16)}
+.abstract-booklet-link .booklet-interactive:hover{background:var(--teal)}
+.abstract-booklet-link .booklet-button strong,.abstract-booklet-link .booklet-button small{display:block}
+.abstract-booklet-link .booklet-button strong{font-size:13px;line-height:1.25}
+.abstract-booklet-link .booklet-button small{margin-top:3px;font-size:11px;line-height:1.3;font-weight:600;opacity:.76}
+.booklet-button-icon{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 6px;border-radius:9px;background:rgba(8,127,157,.12);font-size:10px;font-weight:900}
+.booklet-interactive .booklet-button-icon{background:rgba(255,255,255,.13);font-size:18px}
+@media(max-width:650px){.abstract-booklet-link{grid-template-columns:1fr;gap:9px}.abstract-booklet-link .booklet-button{min-height:62px}}

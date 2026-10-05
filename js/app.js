@@ -881,15 +881,16 @@ function renderAbstracts() {
 
   const bookletHolder = document.querySelector("#abstract-booklet-link");
   if (bookletHolder) {
-    const bookletURL = String(DB.settings.ConferenceBookletURL || "").trim();
-    const bookletText = String(DB.settings.ConferenceBookletButtonText || "Open interactive conference booklet").trim();
-    if (bookletURL) {
-      bookletHolder.hidden = false;
-      bookletHolder.innerHTML = `<a href="${escapeHTML(bookletURL)}" target="_blank" rel="noopener">${escapeHTML(bookletText)} ↗</a>`;
-    } else {
-      bookletHolder.hidden = true;
-      bookletHolder.innerHTML = "";
-    }
+    bookletHolder.hidden = false;
+    bookletHolder.innerHTML = `
+      <a class="booklet-button booklet-interactive" href="https://australianlipidsociety.org/alm7-ils-2026-abstracts/" target="_blank" rel="noopener">
+        <span class="booklet-button-icon" aria-hidden="true">▣</span>
+        <span><strong>Interactive Book of Abstracts</strong><small>Browse the interactive publication</small></span><span aria-hidden="true">↗</span>
+      </a>
+      <a class="booklet-button booklet-pdf" href="assets/ALM7_5th_iLS_Book_of_Abstracts.pdf" target="_blank" rel="noopener">
+        <span class="booklet-button-icon" aria-hidden="true">PDF</span>
+        <span><strong>Book of Abstracts PDF</strong><small>Open the full PDF publication</small></span><span aria-hidden="true">↗</span>
+      </a>`;
   }
 
   const abstracts = DB.abstracts
