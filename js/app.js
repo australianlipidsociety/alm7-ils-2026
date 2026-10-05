@@ -1250,7 +1250,7 @@ function renderSponsorCard(sponsor, tier) {
     <div class="sponsor-copy">
       <h3>${escapeHTML(sponsor.Name)}</h3>
       ${sponsor.Description ? `<p>${escapeHTML(sponsor.Description)}</p>` : ""}
-      ${isExhibitor ? `<div class="silver-room-note">⌖ Located in the Silver Room</div>` : ""}
+      ${(isPlatinum || isExhibitor) ? `<div class="silver-room-note">⌖ Located in the Silver Room</div>` : ""}
       ${scienceHTML}
       <div class="sponsor-actions">
         ${website ? `<a class="sponsor-link" href="${escapeHTML(website)}" target="_blank" rel="noopener">Visit website ↗</a>` : ""}
