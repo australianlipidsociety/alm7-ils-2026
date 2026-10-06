@@ -419,6 +419,27 @@ function getFavourites() {
   catch { return []; }
 }
 
+function talkFavouriteId(id) {
+  return `talk:${id}`;
+}
+
+function isTalkFavourite(id) {
+  return getFavourites().includes(talkFavouriteId(id));
+}
+
+function toggleTalkFavourite(id) {
+  const key = talkFavouriteId(id);
+  const favourites = getFavourites();
+  const next = favourites.includes(key) ? favourites.filter(x => x !== key) : [...favourites, key];
+  localStorage.setItem("alm7-favourites", JSON.stringify(next));
+  updateFavouriteCount();
+  renderProgram();
+  renderMyProgram();
+  renderSearch();
+  const openModal = document.querySelector("#session-modal.open");
+  if (openModal?.dataset.programId) openSessionModal(openModal.dataset.programId, id);
+}
+
 function updateFavouriteCount() {
   document.querySelector("#favourite-count").textContent = getFavourites().length;
 }
@@ -548,31 +569,43 @@ function renderProgram() {
   }).join("");
 }
 
-function openSessionModal(id) {
+function openSessionModal(id, focusPresentationId = "") {
   const item = DB.program.find(x => x.id === id);
   if (!item) return;
   const modal = document.querySelector("#session-modal");
   const content = document.querySelector("#session-modal-content");
+  modal.dataset.programId = id;
   content.innerHTML = `<div class="modal-eyebrow">${escapeHTML(item.type)}</div>
     <h2 id="session-modal-title" class="modal-title">${escapeHTML(item.title)}</h2>
     <div class="modal-meta">${escapeHTML(formatTime(item.start))}–${escapeHTML(formatTime(item.end))} &nbsp; • &nbsp; 📍 ${escapeHTML(item.room)}${item.speaker ? " &nbsp; • &nbsp; " + escapeHTML(item.speaker) : ""}</div>
     ${item.description ? `<p class="modal-intro">${escapeHTML(item.description)}</p>` : ""}
     ${item.chair ? `<p class="modal-meta">Chair: ${escapeHTML(item.chair)}${item.coChair ? " • Co-chair: " + escapeHTML(item.coChair) : ""}</p>` : ""}
-    ${item.presentations.length ? `<div class="presentation-list">${item.presentations.map((p, i) => `<div class="presentation">
+    ${item.presentations.length ? `<div class="presentation-list">${item.presentations.map((p, i) => {
+      const talkSaved = isTalkFavourite(p.id);
+      return `<div class="presentation ${String(p.id) === String(focusPresentationId) ? "presentation-focus" : ""}" data-presentation-id="${escapeHTML(p.id)}">
       <div class="presentation-head">
         <div class="presentation-time">${escapeHTML(formatTime(p.time))}</div>
         <div><div class="presentation-title">${posterNumberForProgramPresentation(p) ? `<span class="poster-number-inline">Poster ${posterNumberForProgramPresentation(p)}</span> ` : ""}${escapeHTML(p.title)}</div><div class="presentation-authors">${escapeHTML(p.authors || p.speaker)}${p.affiliations ? `<br>${escapeHTML(p.affiliations)}` : ""}</div></div>
-        ${p.abstract ? `<button class="abstract-toggle" onclick="toggleAbstract(${i})">Abstract ▾</button>` : ""}
+        <div class="presentation-actions">
+          <button class="talk-favourite ${talkSaved ? "saved" : ""}" onclick="toggleTalkFavourite('${escapeHTML(p.id)}')" aria-label="${talkSaved ? "Remove talk from" : "Add talk to"} My Program">${talkSaved ? "★" : "☆"}</button>
+          ${p.abstract ? `<button class="abstract-toggle" onclick="toggleAbstract(${i})">Abstract ▾</button>` : ""}
+        </div>
       </div>
       ${p.abstract ? `<div id="abstract-${i}" class="abstract-text">${escapeHTML(p.abstract)}</div>` : ""}
-    </div>`).join("")}</div>` : ""}`;
+    </div>`}).join("")}</div>` : ""}`;
   content.scrollTop = 0;
   modal.scrollTop = 0;
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   requestAnimationFrame(() => {
+    const card = modal.querySelector(".session-modal-card");
     content.scrollTop = 0;
     modal.scrollTop = 0;
+    if (card) card.scrollTop = 0;
+    if (focusPresentationId) {
+      const target = content.querySelector(`[data-presentation-id="${CSS.escape(String(focusPresentationId))}"]`);
+      if (target) target.scrollIntoView({block:"center", behavior:"smooth"});
+    }
   });
   document.body.style.overflow = "hidden";
 }
@@ -592,26 +625,98 @@ function renderMyProgram() {
   if (!DB.loaded) return;
   const ids = getFavourites();
   const box = document.querySelector("#my-program-list");
-  const items = DB.program.filter(x => ids.includes(x.id)).sort((a,b) => (a.date+a.start).localeCompare(b.date+b.start));
-  if (!items.length) {
-    box.innerHTML = "You haven't saved any sessions yet.";
+  const sessionIds = ids.filter(id => !String(id).startsWith("talk:"));
+  const talkIds = ids.filter(id => String(id).startsWith("talk:")).map(id => String(id).slice(5));
+
+  const sessions = DB.program.filter(x => sessionIds.includes(x.id))
+    .sort((a,b) => (a.date+a.start).localeCompare(b.date+b.start));
+
+  const talks = [];
+  DB.program.forEach(item => item.presentations.forEach(p => {
+    if (talkIds.includes(String(p.id))) talks.push({item, p});
+  }));
+  talks.sort((a,b) => (a.item.date+a.p.time).localeCompare(b.item.date+b.p.time));
+
+  if (!sessions.length && !talks.length) {
+    box.innerHTML = "You haven't saved any sessions or talks yet.";
     return;
   }
-  box.innerHTML = items.map(item => `<div class="search-result my-program-row">
+
+  const sessionHTML = sessions.map(item => `<div class="search-result my-program-row clickable-result" onclick="openSessionModal('${escapeHTML(item.id)}')">
     <div><div class="search-result-type">${escapeHTML(formatDate(item.date))} • ${escapeHTML(item.type)}</div><div class="search-result-title">${escapeHTML(item.title)}</div><div class="search-result-meta">${escapeHTML(formatTime(item.start))}–${escapeHTML(formatTime(item.end))} • ${escapeHTML(item.room)}</div></div>
-    <button class="program-favourite saved" onclick="toggleFavourite('${escapeHTML(item.id)}')" aria-label="Remove from My Program">★</button>
+    <button class="program-favourite saved" onclick="event.stopPropagation(); toggleFavourite('${escapeHTML(item.id)}')" aria-label="Remove session from My Program">★</button>
   </div>`).join("");
+
+  const talkHTML = talks.map(({item,p}) => `<div class="search-result my-program-row clickable-result" onclick="openSessionModal('${escapeHTML(item.id)}','${escapeHTML(p.id)}')">
+    <div><div class="search-result-type">${escapeHTML(formatDate(item.date))} • ${escapeHTML(formatTime(p.time))} • ${escapeHTML(p.type || "Presentation")}</div><div class="search-result-title">${escapeHTML(p.title)}</div><div class="search-result-meta">${escapeHTML(p.speaker || p.authors)} • ${escapeHTML(item.title)} • ${escapeHTML(item.room)}</div></div>
+    <button class="program-favourite saved" onclick="event.stopPropagation(); toggleTalkFavourite('${escapeHTML(p.id)}')" aria-label="Remove talk from My Program">★</button>
+  </div>`).join("");
+
+  box.innerHTML = `${sessions.length ? `<div class="saved-section-label">Saved sessions</div>${sessionHTML}` : ""}${talks.length ? `<div class="saved-section-label">Saved talks</div>${talkHTML}` : ""}`;
+}
+
+function programItemForSession(sessionId) {
+  return DB.program.find(item => String(item.sessionId || "") === String(sessionId || "")) || null;
 }
 
 function buildSearchItems() {
   const items = [];
-  DB.program.forEach(p => items.push({type:p.type, title:p.title, meta:`${formatDate(p.date, {short:true})} • ${formatTime(p.start)} • ${p.room}`, haystack:`${p.title} ${p.description} ${p.type} ${p.room} ${p.speaker} ${p.chair}`}));
-  DB.presentations.forEach(p => {
-    const abs = DB.abstracts.find(a => a.AbstractID === p.AbstractID) || {};
-    items.push({type:p.PresentationType || "Presentation", title:p.Title || abs.Title, meta:`${p.SpeakerDisplay || p.AuthorsDisplay || ""}`, haystack:`${p.Title} ${p.SpeakerDisplay} ${p.AuthorsDisplay} ${p.AffiliationsDisplay} ${abs.AbstractText || ""} ${abs.Keywords || ""}`});
+
+  DB.program.forEach(p => items.push({
+    type:p.type,
+    title:p.title,
+    meta:`${formatDate(p.date, {short:true})} • ${formatTime(p.start)} • ${p.room}`,
+    haystack:`${p.title} ${p.description} ${p.type} ${p.room} ${p.speaker} ${p.chair}`,
+    action:"session",
+    programId:p.id
+  }));
+
+  DB.presentations.forEach(raw => {
+    const abs = DB.abstracts.find(a => a.AbstractID === raw.AbstractID) || {};
+    const parent = programItemForSession(raw.SessionID);
+    const title = raw.Title || abs.Title || "Untitled presentation";
+    const speaker = raw.SpeakerDisplay || raw.AuthorsDisplay || "";
+    items.push({
+      type:raw.PresentationType || "Presentation",
+      title,
+      meta: parent
+        ? `${speaker}${speaker ? " • " : ""}${formatDate(parent.date,{short:true})} • ${formatTime(normaliseTime(raw.StartTime))} • ${parent.title} • ${parent.room}`
+        : speaker,
+      haystack:`${title} ${speaker} ${raw.AuthorsDisplay || ""} ${raw.AffiliationsDisplay || ""} ${abs.AbstractText || ""} ${abs.Keywords || ""} ${parent?.title || ""} ${parent?.room || ""}`,
+      action: parent ? "presentation" : "",
+      programId: parent?.id || "",
+      presentationId: raw.PresentationID || ""
+    });
   });
-  DB.speakers.filter(s => s.DisplayName).forEach(s => items.push({type:"Speaker", title:s.DisplayName, meta:s.Affiliation || "", haystack:`${s.DisplayName} ${s.Affiliation} ${s.Bio || ""}`}));
+
+  DB.speakers.filter(s => s.DisplayName).forEach(s => {
+    const speakerPresentations = DB.presentations.filter(p =>
+      String(p.SpeakerID || "") === String(s.SpeakerID || "") ||
+      String(p.SpeakerDisplay || "").toLowerCase() === String(s.DisplayName || "").toLowerCase()
+    );
+    const first = speakerPresentations.map(p => ({p,parent:programItemForSession(p.SessionID)})).find(x => x.parent);
+    items.push({
+      type:"Speaker",
+      title:s.DisplayName,
+      meta:first?.parent
+        ? `${s.Affiliation || ""}${s.Affiliation ? " • " : ""}${formatDate(first.parent.date,{short:true})} • ${formatTime(normaliseTime(first.p.StartTime))} • ${first.parent.title}`
+        : (s.Affiliation || ""),
+      haystack:`${s.DisplayName} ${s.Affiliation} ${s.Bio || ""} ${speakerPresentations.map(p => `${p.Title || ""} ${p.SpeakerDisplay || ""}`).join(" ")}`,
+      action:"speaker",
+      programId:first?.parent?.id || "",
+      presentationId:first?.p?.PresentationID || "",
+      speakerId:s.SpeakerID || ""
+    });
+  });
   return items;
+}
+
+function openSearchResult(action, programId, presentationId, speakerId) {
+  if (action === "session" && programId) return openSessionModal(programId);
+  if (action === "presentation" && programId) return openSessionModal(programId, presentationId);
+  if (action === "speaker" && speakerId && typeof openSpeaker === "function") {
+    return openSpeaker(speakerId);
+  }
 }
 
 function renderSearch() {
@@ -620,7 +725,14 @@ function renderSearch() {
   const q = input.value.trim().toLowerCase();
   if (!q) { box.innerHTML = "Start typing to search."; return; }
   const matches = buildSearchItems().filter(item => `${item.title} ${item.meta} ${item.haystack}`.toLowerCase().includes(q)).slice(0, 40);
-  box.innerHTML = matches.length ? matches.map(item => `<div class="search-result"><div class="search-result-type">${escapeHTML(item.type)}</div><div class="search-result-title">${escapeHTML(item.title)}</div><div class="search-result-meta">${escapeHTML(item.meta)}</div></div>`).join("") : "No results found.";
+  box.innerHTML = matches.length ? matches.map(item => {
+    const clickable = item.action ? " clickable-result" : "";
+    const onclick = item.action ? ` onclick="openSearchResult('${escapeHTML(item.action)}','${escapeHTML(item.programId || "")}','${escapeHTML(item.presentationId || "")}','${escapeHTML(item.speakerId || "")}')"` : "";
+    const fav = item.action === "presentation" && item.presentationId
+      ? `<button class="search-talk-favourite ${isTalkFavourite(item.presentationId) ? "saved" : ""}" onclick="event.stopPropagation(); toggleTalkFavourite('${escapeHTML(item.presentationId)}')" aria-label="Favourite this talk">${isTalkFavourite(item.presentationId) ? "★" : "☆"}</button>`
+      : "";
+    return `<div class="search-result${clickable}"${onclick}><div class="search-result-content"><div class="search-result-type">${escapeHTML(item.type)}</div><div class="search-result-title">${escapeHTML(item.title)}</div><div class="search-result-meta">${escapeHTML(item.meta)}</div></div>${fav}${item.action ? `<span class="search-result-arrow">→</span>` : ""}</div>`;
+  }).join("") : "No results found.";
 }
 
 function renderLoadError(error) {

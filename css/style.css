@@ -3754,3 +3754,111 @@ a.destination-card:hover .destination-image img {
 .booklet-button-icon{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 6px;border-radius:9px;background:rgba(8,127,157,.12);font-size:10px;font-weight:900}
 .booklet-interactive .booklet-button-icon{background:rgba(255,255,255,.13);font-size:18px}
 @media(max-width:650px){.abstract-booklet-link{grid-template-columns:1fr;gap:9px}.abstract-booklet-link .booklet-button{min-height:62px}}
+
+
+/* ===== Search navigation + individual talk favourites ===== */
+.search-result.clickable-result {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  border-radius:10px;
+  padding-left:10px;
+  padding-right:10px;
+  transition:background .15s ease, transform .15s ease;
+}
+.search-result.clickable-result:hover {
+  background:#F4F8FA;
+  transform:translateX(2px);
+}
+.search-result-content { flex:1; min-width:0; }
+.search-result-arrow { color:var(--teal); font-weight:900; font-size:18px; }
+.search-talk-favourite,
+.talk-favourite {
+  flex:0 0 auto;
+  width:36px;
+  height:36px;
+  border:1px solid var(--line);
+  border-radius:50%;
+  background:#fff;
+  color:var(--muted);
+  font-size:20px;
+  cursor:pointer;
+}
+.search-talk-favourite.saved,
+.talk-favourite.saved {
+  color:var(--gold);
+  background:#FBF8EF;
+  border-color:#E7DDBE;
+}
+.presentation-actions {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  justify-content:flex-end;
+}
+.presentation-focus {
+  background:#F2F8FA !important;
+  box-shadow:inset 3px 0 0 var(--teal);
+}
+.saved-section-label {
+  margin:18px 0 5px;
+  color:var(--navy);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.saved-section-label:first-child { margin-top:0; }
+
+@media(max-width:650px) {
+  .presentation-head { grid-template-columns:58px minmax(0,1fr) !important; }
+  .presentation-actions {
+    grid-column:2;
+    justify-content:flex-start;
+    margin-top:7px;
+  }
+}
+
+
+/* ===== Search focus polish ===== */
+.presentation.presentation-focus {
+  position: relative;
+  box-shadow: none !important;
+}
+.presentation.presentation-focus::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--teal);
+}
+.presentation.presentation-focus .presentation-time {
+  padding-left: 7px;
+}
+
+
+/* ===== Search jump highlight: keep all emphasis away from the time column ===== */
+.presentation.presentation-focus,
+.presentation.presentation-focus::before {
+  box-shadow: none !important;
+  border-left: 0 !important;
+}
+.presentation.presentation-focus::before {
+  display: none !important;
+  content: none !important;
+}
+.presentation.presentation-focus .presentation-time {
+  padding-left: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.presentation.presentation-focus .presentation-head > div:nth-child(2) {
+  background: #F2F8FA;
+  border-radius: 8px;
+  padding: 7px 9px;
+  box-shadow: inset 3px 0 0 var(--teal);
+}
