@@ -19,6 +19,19 @@ const DB = {
 let selectedProgramDate = "2026-10-18";
 let selectedProgramFilter = "All";
 
+const SESSION_SUBTHEMES = {
+  "AI, Computational Tools & Data Standards for Lipidomics 1": "Computational tools and software in lipidomics",
+  "Lipids in Health and Disease 1": "Membrane, in-vitro biology and biosensors",
+  "Clinical Lipidomics: From Pre-analytics to Cohort Studies 1": "Clinical and population lipidomics",
+  "Clinical Lipidomics: From Pre-analytics to Cohort Studies 2": "Clinical and population lipidomics",
+  "Lipids in Health and Disease 2": "Lipoproteins and lipids in cardiometabolic disease",
+  "Microbial & Plant Lipids in Health and Biotechnology 1": "Lipidomic applications in animals, milk and microbiota",
+  "Advancements in Lipidomic Technologies 1": "Novel lipidomic methods and lipidomic applications in tissue",
+  "Advancements in Lipidomic Technologies 2": "Novel lipidomic methods and lipidomic applications in tissue",
+  "Lipid Imaging & Single-Cell Lipidomics 1": "Imaging, Spatial and Structural Lipidomics",
+  "Lipid Particles and Delivery Systems 1": "Lipid synthesis, delivery and metabolism"
+};
+
 const FILTER_ORDER = [
   "All", "Plenary", "Keynote", "Session", "Workshop", "Poster", "Break",
   "Lunch", "Registration", "AGM", "Social", "Opening", "Awards", "Closing", "Other"
@@ -304,6 +317,7 @@ function buildDatabase(raw) {
       sessionId: row.SessionID,
       speaker: row.SpeakerDisplay || "",
       description: row.Description || session.Description || "",
+      subtheme: session.Subtheme || SESSION_SUBTHEMES[session.SessionTitle] || SESSION_SUBTHEMES[row.Title] || "",
       chair: session.Chair || "",
       coChair: session.CoChair || "",
       track: session.Track || "",
@@ -542,7 +556,7 @@ function renderProgram() {
   const q = (document.querySelector("#program-search")?.value || "").trim().toLowerCase();
   let items = DB.program.filter(item => item.date === selectedProgramDate);
   if (selectedProgramFilter !== "All") items = items.filter(item => item.type === selectedProgramFilter);
-  if (q) items = items.filter(item => [item.title,item.type,item.room,item.description,item.chair,item.speaker,item.track,...item.presentations.map(p => `${p.title} ${p.authors} ${p.abstract} ${p.keywords}`)].join(" ").toLowerCase().includes(q));
+  if (q) items = items.filter(item => [item.title,item.subtheme,item.type,item.room,item.description,item.chair,item.speaker,item.track,...item.presentations.map(p => `${p.title} ${p.authors} ${p.abstract} ${p.keywords}`)].join(" ").toLowerCase().includes(q));
 
   const list = document.querySelector("#program-list");
   document.querySelector("#program-summary-text").textContent = `${formatDate(selectedProgramDate)} • ${items.length} item${items.length === 1 ? "" : "s"} shown`;
@@ -560,6 +574,7 @@ function renderProgram() {
       <div class="program-line"></div>
       <div class="program-main">
         ${hasDetails ? `<button class="program-title-button" onclick="openSessionModal('${escapeHTML(item.id)}')">${escapeHTML(item.title)}</button>` : `<div class="program-title-button">${escapeHTML(item.title)}</div>`}
+        ${item.subtheme ? `<div class="program-subtheme">${escapeHTML(item.subtheme)}</div>` : ""}
         <div class="program-meta">📍 ${escapeHTML(item.room)}${item.speaker ? " • " + escapeHTML(item.speaker) : ""}${item.chair ? " • Chair: " + escapeHTML(item.chair) : ""}</div>
         ${item.description ? `<div class="program-description">${escapeHTML(item.description)}</div>` : ""}
         <div class="program-badges"><span class="program-badge">${escapeHTML(item.type)}</span>${item.presentations.length ? `<span class="program-badge">${item.presentations.length} presentation${item.presentations.length === 1 ? "" : "s"}</span>` : ""}</div>
@@ -569,6 +584,17 @@ function renderProgram() {
   }).join("");
 }
 
+
+function programSponsorHTML(item) {
+  if (item.title === "Conference Dinner") {
+    return `<div class="program-sponsor-callout"><span>Brought to you by our Platinum Sponsor:</span><img src="assets/sponsors/sciex.png" alt="SCIEX"></div>`;
+  }
+  if (item.title === "Closing Lunch") {
+    return `<div class="program-sponsor-callout"><span>Brought to you by our Gold Sponsor:</span><img src="assets/sponsors/agilent-technologies.png" alt="Agilent Technologies"></div>`;
+  }
+  return "";
+}
+
 function openSessionModal(id, focusPresentationId = "") {
   const item = DB.program.find(x => x.id === id);
   if (!item) return;
@@ -576,7 +602,8 @@ function openSessionModal(id, focusPresentationId = "") {
   const content = document.querySelector("#session-modal-content");
   modal.dataset.programId = id;
   content.innerHTML = `<div class="modal-eyebrow">${escapeHTML(item.type)}</div>
-    <h2 id="session-modal-title" class="modal-title">${escapeHTML(item.title)}</h2>
+    <h2 id="session-modal-title" class="modal-title">${escapeHTML(item.title)}</h2>\n    ${item.subtheme ? `<div class="modal-subtheme">${escapeHTML(item.subtheme)}</div>` : ""}
+    ${programSponsorHTML(item)}
     <div class="modal-meta">${escapeHTML(formatTime(item.start))}–${escapeHTML(formatTime(item.end))} &nbsp; • &nbsp; 📍 ${escapeHTML(item.room)}${item.speaker ? " &nbsp; • &nbsp; " + escapeHTML(item.speaker) : ""}</div>
     ${item.description ? `<p class="modal-intro">${escapeHTML(item.description)}</p>` : ""}
     ${item.chair ? `<p class="modal-meta">Chair: ${escapeHTML(item.chair)}${item.coChair ? " • Co-chair: " + escapeHTML(item.coChair) : ""}</p>` : ""}

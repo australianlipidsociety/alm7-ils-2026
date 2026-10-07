@@ -670,6 +670,24 @@ h2 { font-size: 28px; }
 
 .program-title-button:hover { color: var(--teal); }
 
+.program-subtheme {
+  margin-top: 3px;
+  color: var(--teal);
+  font-size: 13px;
+  line-height: 1.35;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.modal-subtheme {
+  margin: -4px 0 10px;
+  color: var(--teal);
+  font-size: 14px;
+  line-height: 1.4;
+  font-style: italic;
+  font-weight: 600;
+}
+
 .program-meta {
   margin-top: 4px;
   color: var(--muted);
@@ -3861,4 +3879,32 @@ a.destination-card:hover .destination-image img {
   border-radius: 8px;
   padding: 7px 9px;
   box-shadow: inset 3px 0 0 var(--teal);
+}
+
+.program-sponsor-callout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 10px 0 14px;
+  padding: 9px 12px;
+  border: 1px solid rgba(183, 163, 106, .45);
+  border-radius: 10px;
+  background: #fbf7ec;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+.program-sponsor-callout img {
+  display: block;
+  max-width: 120px;
+  max-height: 34px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+@media (max-width: 600px) {
+  .program-sponsor-callout { align-items: flex-start; flex-direction: column; }
+  .program-sponsor-callout img { max-width: 110px; max-height: 32px; }
 }
