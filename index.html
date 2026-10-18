@@ -812,5 +812,45 @@
 <script src="js/config.js?v=20261006-3"></script>
   <script src="js/workshop.js?v=20261006-3"></script>
   <script src="js/app.js?v=20261016-1"></script>
+  <script>
+    // Show both session chairs in the Full Program preview without changing
+    // the Google Sheets loader or any other program/app functionality.
+    (function () {
+      const originalRenderProgram = window.renderProgram;
+      if (typeof originalRenderProgram !== "function") return;
+
+      window.renderProgram = function (...args) {
+        const result = originalRenderProgram.apply(this, args);
+        const items = typeof DB !== "undefined" && Array.isArray(DB.program) ? DB.program : [];
+
+        document.querySelectorAll("#program-list .program-row").forEach(row => {
+          const titleButton = row.querySelector(".program-title-button[onclick]");
+          const match = titleButton?.getAttribute("onclick")?.match(/openSessionModal\(['"]([^'"]+)['"]\)/);
+          if (!match) return;
+
+          const item = items.find(entry => String(entry.id) === match[1]);
+          if (!item) return;
+          const first = String(item.chair || "").trim();
+          const second = String(item.coChair || "").trim();
+          if (!first && !second) return;
+
+          const metadata = row.querySelector(".program-meta");
+          if (!metadata) return;
+          const marker = " • Chair: ";
+          const markerIndex = metadata.innerHTML.lastIndexOf(marker);
+          const prefix = markerIndex < 0 ? metadata.innerHTML : metadata.innerHTML.slice(0, markerIndex);
+          const chairLabel = first && second
+            ? `Co-chairs: ${escapeHTML(first)} &amp; ${escapeHTML(second)}`
+            : first ? `Chair: ${escapeHTML(first)}` : `Co-chair: ${escapeHTML(second)}`;
+          metadata.innerHTML = `${prefix} • ${chairLabel}`;
+        });
+
+        return result;
+      };
+
+      // Covers the case where the data has already finished loading.
+      if (typeof DB !== "undefined" && DB.loaded) window.renderProgram();
+    })();
+  </script>
 </body>
 </html>
